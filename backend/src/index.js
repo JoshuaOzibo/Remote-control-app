@@ -1,8 +1,12 @@
 import { createApp } from './app.js';
 import { printBanner } from './banner.js';
 import { config } from './config/env.js';
+import { warnUnmappedKeys } from './features/input/input.keymap.js';
+import { KEYS } from './features/remote/remote.protocol.js';
 import { attachRemoteSocket } from './features/remote/remote.socket.js';
 import { log } from './shared/logger.js';
+
+warnUnmappedKeys(KEYS);
 
 const app = createApp();
 let remote;
