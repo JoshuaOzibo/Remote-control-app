@@ -18,4 +18,8 @@ function lanAddresses() {
     .map(({ address }) => address);
 }
 
-export { lanAddresses };
+function clientIp(request) {
+  return (request.socket.remoteAddress ?? 'unknown').replace(/^::ffff:/, '');
+}
+
+export { lanAddresses, clientIp };
