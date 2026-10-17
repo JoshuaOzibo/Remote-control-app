@@ -1,2 +1,5 @@
 node_modules
 .env
+
+# Working notes: phase-by-phase backend plan
+plan/
