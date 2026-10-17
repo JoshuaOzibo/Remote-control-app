@@ -5,6 +5,7 @@ import { warnUnmappedKeys } from './features/input/input.keymap.js';
 import { KEYS } from './features/remote/remote.protocol.js';
 import { attachRemoteSocket } from './features/remote/remote.socket.js';
 import { log } from './shared/logger.js';
+import { registerShutdown } from './shutdown.js';
 
 warnUnmappedKeys(KEYS);
 
@@ -21,10 +22,4 @@ const server = app.listen(config.port, config.host, (error) => {
   printBanner();
 });
 
-function shutdown() {
-  remote?.close();
-  server.close(() => process.exit(0));
-}
-
-process.once('SIGINT', shutdown);
-process.once('SIGTERM', shutdown);
+registerShutdown(server, () => remote);

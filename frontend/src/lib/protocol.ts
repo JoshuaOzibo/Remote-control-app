@@ -55,7 +55,13 @@ export type ClientMsg =
   | { t: "key"; k: KeyName }
   | { t: "type"; text: string };
 
-export type ServerMsg = { t: "auth"; ok: boolean };
+export type AuthFailure = "wrong-pin" | "locked";
+
+export type ServerMsg = { t: "auth"; ok: true } | { t: "auth"; ok: false; reason?: AuthFailure };
+
+export const CLOSE_CODE = {
+  replaced: 4002,
+} as const;
 
 export function isServerMsg(value: unknown): value is ServerMsg {
   return (

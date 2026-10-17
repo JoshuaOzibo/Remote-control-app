@@ -7,6 +7,7 @@ import { icon } from "@/components/ui/icons";
 import { Key } from "@/components/ui/Key";
 import { isCompletePin, PinInput } from "@/components/ui/PinInput";
 import { connect, useRemote } from "@/hooks/useRemote";
+import { connectionErrorText } from "@/lib/connectionErrors";
 import { useRemoteStore } from "@/store/remoteStore";
 import { RecentLaptops } from "./RecentLaptops";
 
@@ -27,6 +28,7 @@ export function ConnectForm() {
   const [pin, setPin] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
+  const [showQrHint, setShowQrHint] = useState(false);
 
   // Prefill once saved values are loaded (client only, so window is available).
   if (hydrated && !prefilled) {
@@ -49,7 +51,7 @@ export function ConnectForm() {
   };
 
   const loading = submitted && status === "connecting";
-  const message = submitted && status === "error" ? (error === "wrong-pin" ? "Wrong PIN" : "Can't reach laptop") : null;
+  const message = submitted && status === "error" ? connectionErrorText(error) : null;
 
   return (
     <>
@@ -116,10 +118,22 @@ export function ConnectForm() {
         </div>
       </form>
 
-      <Key className="h-[52px] flex-row gap-1.5 text-[14px] font-semibold" title="Coming soon">
-        <ScanQrCode size={20} strokeWidth={1.8} aria-hidden />
-        Scan QR from laptop
-      </Key>
+      <div className="flex flex-col gap-2.5">
+        <Key
+          className="h-[52px] flex-row gap-1.5 text-[14px] font-semibold"
+          aria-expanded={showQrHint}
+          onPress={() => setShowQrHint((shown) => !shown)}
+        >
+          <ScanQrCode size={20} strokeWidth={1.8} aria-hidden />
+          Scan QR from laptop
+        </Key>
+        {showQrHint && (
+          <p className="m-0 text-center text-[13px] leading-[1.45] text-muted">
+            Point your phone camera at the QR code in the laptop terminal. It opens this app with the address already
+            filled in.
+          </p>
+        )}
+      </div>
 
       <RecentLaptops
         onPick={(laptop) => {

@@ -6,6 +6,7 @@ import { icon } from "@/components/ui/icons";
 import { Key } from "@/components/ui/Key";
 import { sendKey, useRemote } from "@/hooks/useRemote";
 import { useRepeatPress } from "@/hooks/useRepeatPress";
+import { connectionErrorText } from "@/lib/connectionErrors";
 import { useRemoteStore } from "@/store/remoteStore";
 
 /** Power (sleep/lock), title with connection status, and the Connect / Connected pill. */
@@ -68,11 +69,7 @@ function statusLine(
     case "connecting":
       return { text: "Connecting…", color: "#FF9F43", glow: "0 0 8px rgba(255,159,67,.6)" };
     case "error":
-      return {
-        text: error === "wrong-pin" ? "Wrong PIN" : "Can't reach laptop",
-        color: "#F0524F",
-        glow: "none",
-      };
+      return { text: connectionErrorText(error), color: "#F0524F", glow: "none" };
     default:
       return { text: "Not connected", color: "#6B7280", glow: "none" };
   }

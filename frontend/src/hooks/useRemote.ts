@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { isServerMsg, type ClientMsg, type KeyName } from "@/lib/protocol";
+import { CLOSE_CODE, isServerMsg, type ClientMsg, type KeyName } from "@/lib/protocol";
 import { useRemoteStore } from "@/store/remoteStore";
+import type { ConnectionError } from "@/types";
 
 const RETRY_MS = 1000;
 
@@ -15,7 +16,6 @@ let retryTimer: ReturnType<typeof setTimeout> | undefined;
 let onAuthed: (() => void) | undefined;
 let autoConnectTried = false;
 
-/** Accepts "192.168.1.23:3001", "http://192.168.1.23:3001/" or "ws://…/ws". */
 function toSocketUrl(address: string) {
   const host = address
     .trim()
@@ -24,6 +24,12 @@ function toSocketUrl(address: string) {
     .replace(/\/+$/, "");
   const scheme = window.location.protocol === "https:" ? "wss" : "ws";
   return `${scheme}://${host}/ws`;
+}
+
+function stopRetrying(reason: ConnectionError) {
+  target = null;
+  onAuthed = undefined;
+  useRemoteStore.getState().setStatus("error", reason);
 }
 
 function scheduleRetry() {
@@ -71,18 +77,16 @@ function open() {
       onAuthed?.();
       onAuthed = undefined;
     } else {
-      // Wrong PIN: stop here instead of hammering the server.
-      target = null;
-      onAuthed = undefined;
-      useRemoteStore.getState().setStatus("error", "wrong-pin");
+      stopRetrying(msg.reason ?? "wrong-pin");
       ws.close();
     }
   };
 
-  ws.onclose = () => {
+  ws.onclose = (event) => {
     if (ws !== socket) return;
     socket = null;
     authed = false;
+    if (event.code === CLOSE_CODE.replaced) stopRetrying("replaced");
     if (!target) return;
     // A dropped working connection reconnects quietly; a laptop we never reached shows an error.
     if (everAuthed) useRemoteStore.getState().setStatus("connecting");

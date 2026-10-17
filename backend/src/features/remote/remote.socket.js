@@ -1,15 +1,22 @@
 import { WebSocketServer } from 'ws';
 import { log } from '../../shared/logger.js';
 import { clientIp } from '../../shared/network.js';
+import { isAllowedOrigin } from './remote.origin.js';
+import { CLOSE_CODE } from './remote.protocol.js';
 import { startSession } from './remote.session.js';
 
 const PATH = '/ws';
 const MAX_PAYLOAD_BYTES = 4 * 1024;
 const HEARTBEAT_MS = 15000;
-const GOING_AWAY = 1001;
+
+function verifyClient({ req }) {
+  const allowed = isAllowedOrigin(req);
+  if (!allowed) log.warn('remote', `${clientIp(req)} refused: origin ${req.headers.origin} is not allowed`);
+  return allowed;
+}
 
 function attachRemoteSocket(server) {
-  const wss = new WebSocketServer({ server, path: PATH, maxPayload: MAX_PAYLOAD_BYTES });
+  const wss = new WebSocketServer({ server, path: PATH, maxPayload: MAX_PAYLOAD_BYTES, verifyClient });
   const awaitingPong = new WeakSet();
 
   wss.on('connection', (socket, request) => {
@@ -32,7 +39,7 @@ function attachRemoteSocket(server) {
 
   function close() {
     clearInterval(heartbeat);
-    for (const socket of wss.clients) socket.close(GOING_AWAY, 'Server shutting down');
+    for (const socket of wss.clients) socket.close(CLOSE_CODE.shuttingDown, 'Server shutting down');
     wss.close();
   }
 

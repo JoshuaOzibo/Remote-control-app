@@ -72,8 +72,16 @@ function parseMessage(raw) {
   return parsers[data.t](data);
 }
 
-function authReply(ok) {
-  return JSON.stringify({ t: 'auth', ok });
+const CLOSE_CODE = {
+  shuttingDown: 1001,
+  authTimeout: 4000,
+  wrongPin: 4001,
+  replaced: 4002,
+  lockedOut: 4003,
+};
+
+function authReply(ok, reason) {
+  return JSON.stringify(ok ? { t: 'auth', ok } : { t: 'auth', ok, reason });
 }
 
-export { KEYS, parseMessage, authReply };
+export { KEYS, CLOSE_CODE, parseMessage, authReply };

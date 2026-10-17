@@ -1,6 +1,6 @@
 export type ConnectionStatus = "idle" | "connecting" | "connected" | "error";
 
-export type ConnectionError = "wrong-pin" | "unreachable";
+export type ConnectionError = "wrong-pin" | "locked" | "replaced" | "unreachable";
 
 export type Mode = "dial" | "trackpad";
 

@@ -6,15 +6,27 @@ import { segmentText } from './input.text.js';
 
 const PASTE_SETTLE_MS = 150;
 
+const heldKeys = new Set();
+
+async function press(key) {
+  await keyboard.pressKey(key);
+  heldKeys.add(key);
+}
+
+async function release(key) {
+  heldKeys.delete(key);
+  await keyboard.releaseKey(key);
+}
+
 async function pressCombo(combo) {
-  const held = [];
+  const pressed = [];
   try {
     for (const key of combo) {
-      await keyboard.pressKey(key);
-      held.push(key);
+      await press(key);
+      pressed.push(key);
     }
   } finally {
-    for (const key of held.reverse()) await keyboard.releaseKey(key);
+    for (const key of pressed.reverse()) await release(key);
   }
 }
 
@@ -45,4 +57,8 @@ function typeText(text) {
   enqueue(() => writeText(text));
 }
 
-export { tapKey, typeText };
+async function releaseHeldKeys() {
+  for (const key of [...heldKeys].reverse()) await release(key).catch(() => {});
+}
+
+export { tapKey, typeText, releaseHeldKeys };
