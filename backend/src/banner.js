@@ -1,4 +1,5 @@
 import { config } from './config/env.js';
+import { isWebBuilt } from './features/web/web.routes.js';
 import { log } from './shared/logger.js';
 import { lanAddresses } from './shared/network.js';
 
@@ -15,6 +16,9 @@ function printBanner() {
 
   if (config.usingDefaultPin) {
     log.warn('config', 'Using the default PIN. Set PIN in backend/.env');
+  }
+  if (!isWebBuilt()) {
+    log.warn('web', 'Frontend not built yet. Run: npm run build:web');
   }
 }
 

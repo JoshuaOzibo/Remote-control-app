@@ -3,3 +3,6 @@ node_modules
 
 # Working notes: phase-by-phase backend plan
 plan/
+
+# Built frontend, copied from frontend/out by npm run build:web
+public/
