@@ -1,4 +1,3 @@
-import qrcode from 'qrcode-terminal';
 import { config } from './config/env.js';
 import { isWebBuilt } from './features/web/web.routes.js';
 import { log } from './shared/logger.js';
@@ -10,24 +9,10 @@ function reachableHosts() {
   return config.host === ALL_INTERFACES ? [...lanAddresses(), 'localhost'] : [config.host];
 }
 
-function urlFor(host) {
-  return `http://${host}:${config.port}`;
-}
-
-function printQrCode(url) {
-  qrcode.generate(url, { small: true }, (qr) => {
-    console.log(`  Scan with your phone camera to open ${url}\n`);
-    console.log(qr.replace(/^/gm, '  '));
-  });
-}
-
 function printBanner() {
-  const hosts = reachableHosts();
-  const urls = hosts.map((host) => `    ${urlFor(host)}`);
+  const urls = reachableHosts().map((host) => `    http://${host}:${config.port}`);
 
   console.log(['', `  remote_app  (${config.nodeEnv})`, ...urls, '', `    PIN: ${config.pin}`, ''].join('\n'));
-
-  if (hosts[0] !== 'localhost') printQrCode(urlFor(hosts[0]));
 
   if (config.usingDefaultPin) {
     log.warn('config', 'Using the default PIN. Set PIN in backend/.env');

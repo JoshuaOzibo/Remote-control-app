@@ -4,12 +4,11 @@ import { Check, Laptop, Power } from "lucide-react";
 import Link from "next/link";
 import { icon } from "@/components/ui/icons";
 import { Key } from "@/components/ui/Key";
-import { sendKey, useRemote } from "@/hooks/useRemote";
+import { disconnect, useRemote } from "@/hooks/useRemote";
 import { useRepeatPress } from "@/hooks/useRepeatPress";
 import { connectionErrorText } from "@/lib/connectionErrors";
 import { useRemoteStore } from "@/store/remoteStore";
 
-/** Power (sleep/lock), title with connection status, and the Connect / Connected pill. */
 export function RemoteHeader() {
   const { status, error } = useRemote();
   const laptopName = useRemoteStore((s) => s.recent[0]?.name ?? "My laptop");
@@ -20,9 +19,10 @@ export function RemoteHeader() {
   return (
     <header className="flex h-14 items-center gap-3">
       <Key
-        aria-label="Sleep or lock laptop"
-        onPress={() => sendKey("lock")}
-        className="h-12 w-12 shrink-0 rounded-3xl text-power"
+        aria-label="Disconnect from laptop"
+        onPress={disconnect}
+        disabled={status === "idle"}
+        className="h-12 w-12 shrink-0 rounded-3xl text-power disabled:cursor-default disabled:opacity-40"
       >
         <Power {...icon} />
       </Key>

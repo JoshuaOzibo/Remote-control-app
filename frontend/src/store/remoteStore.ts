@@ -12,14 +12,14 @@ type RemoteState = {
   pin: string;
   sensitivity: number;
   recent: RecentLaptop[];
+  autoConnect: boolean;
   hydrated: boolean;
 
   setStatus: (status: ConnectionStatus, error?: ConnectionError | null) => void;
   setMode: (mode: Mode) => void;
   setSensitivity: (sensitivity: number) => void;
-  /** Saves a working address + PIN and moves it to the top of the recent list. */
+  setAutoConnect: (autoConnect: boolean) => void;
   remember: (address: string, pin: string) => void;
-  /** Reads saved values from localStorage. Client only, called once on mount. */
   hydrate: () => void;
 };
 
@@ -31,6 +31,7 @@ export const useRemoteStore = create<RemoteState>((set, get) => ({
   pin: "",
   sensitivity: 1.6,
   recent: [],
+  autoConnect: true,
   hydrated: false,
 
   setStatus: (status, error = null) => set({ status, error }),
@@ -39,6 +40,10 @@ export const useRemoteStore = create<RemoteState>((set, get) => ({
     set({ mode });
   },
   setSensitivity: (sensitivity) => set({ sensitivity }),
+  setAutoConnect: (autoConnect) => {
+    save(STORAGE_KEYS.autoConnect, autoConnect);
+    set({ autoConnect });
+  },
 
   remember: (address, pin) => {
     const existing = get().recent.find((r) => r.address === address);
@@ -48,6 +53,7 @@ export const useRemoteStore = create<RemoteState>((set, get) => ({
     save(STORAGE_KEYS.pin, pin);
     save(STORAGE_KEYS.recent, recent);
     set({ address, pin, recent });
+    get().setAutoConnect(true);
   },
 
   hydrate: () => {
@@ -57,6 +63,7 @@ export const useRemoteStore = create<RemoteState>((set, get) => ({
       pin: load(STORAGE_KEYS.pin, ""),
       recent: load<RecentLaptop[]>(STORAGE_KEYS.recent, []),
       mode: load<Mode>(STORAGE_KEYS.mode, "dial") === "trackpad" ? "trackpad" : "dial",
+      autoConnect: load<boolean>(STORAGE_KEYS.autoConnect, true) !== false,
       hydrated: true,
     });
   },

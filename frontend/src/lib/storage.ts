@@ -5,6 +5,7 @@ export const STORAGE_KEYS = {
   pin: "remote.pin",
   recent: "remote.recent",
   mode: "remote.mode",
+  autoConnect: "remote.autoConnect",
 } as const;
 
 export function load<T>(key: string, fallback: T): T {

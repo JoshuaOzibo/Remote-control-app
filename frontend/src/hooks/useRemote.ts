@@ -119,6 +119,7 @@ export function disconnect() {
   authed = false;
   old?.close();
   useRemoteStore.getState().setStatus("idle");
+  useRemoteStore.getState().setAutoConnect(false);
 }
 
 /** Sends a message if the socket is open and authenticated. Returns whether it was sent. */
@@ -149,8 +150,8 @@ export function useRemote() {
     store.hydrate();
     if (autoConnectTried) return;
     autoConnectTried = true;
-    const { address, pin } = useRemoteStore.getState();
-    if (!target && address && /^\d{4}$/.test(pin)) connect(address, pin);
+    const { address, pin, autoConnect } = useRemoteStore.getState();
+    if (autoConnect && !target && address && /^\d{4}$/.test(pin)) connect(address, pin);
   }, []);
 
   return { status, error, connect, disconnect, send };
