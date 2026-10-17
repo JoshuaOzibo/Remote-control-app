@@ -194,26 +194,27 @@
       0 0 0 6px #121419,
       0 0 0 7px #262930;
   }
+  /* Indicators only: the arrow the knob is turned to lights amber. */
   .arrow {
-    appearance: none;
     position: absolute;
     width: 72px;
     height: 72px;
-    border: 0;
-    background: transparent;
     color: #c9cdd4;
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: none;
     transition:
-      color 60ms ease-out,
-      background 60ms ease-out;
+      color 120ms ease-out,
+      filter 120ms ease-out;
   }
-  .arrow[data-pressed] {
+  .arrow[data-lit] {
     color: #ff9f43;
-    background: rgba(0, 0, 0, 0.2);
+    filter: drop-shadow(0 0 6px rgba(255, 159, 67, 0.6));
   }
+  /* The knob is a lit ball: the shading and gloss stay put (fixed light), the face turns
+     to one of the 4 arrows with --spin (multiples of 90deg), and the whole ball tilts
+     toward the finger with --tilt-x / --tilt-y. */
   .knob {
     appearance: none;
     position: absolute;
@@ -224,20 +225,76 @@
     border-radius: 50%;
     border: 0;
     padding: 0;
-    background: radial-gradient(circle at 38% 28%, #4a505b 0%, #272b32 45%, #15171b 100%);
+    background: radial-gradient(circle at 38% 28%, #565c68 0%, #2f343c 34%, #1a1d22 68%, #0e1013 100%);
     box-shadow:
       inset 0 2px 1px rgba(255, 255, 255, 0.16),
-      inset 0 -8px 14px rgba(0, 0, 0, 0.5),
-      0 14px 24px rgba(0, 0, 0, 0.6),
+      inset 0 -10px 18px rgba(0, 0, 0, 0.55),
+      0 16px 26px rgba(0, 0, 0, 0.65),
       0 0 0 3px #0e1013;
+    touch-action: none;
+    transform: perspective(480px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+    transition: transform 120ms ease-out;
+  }
+  .knob[data-pressed] {
+    transform: perspective(480px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) scale(0.97);
+  }
+  .knob-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    touch-action: none;
-    transition: transform 60ms ease-out;
+    transform: rotate(var(--spin, 0deg));
+    /* Snaps between the 4 arrows with the same springy overshoot as the dot. */
+    transition: transform 240ms cubic-bezier(0.3, 1.4, 0.5, 1);
   }
-  .knob[data-pressed] {
-    transform: scale(0.97);
+  /* Small dimple at the top of the face, so you can see which way the ball is turned. */
+  .knob-mark {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    margin-left: -3px;
+    border-radius: 50%;
+    background: #0b0c0f;
+    box-shadow:
+      inset 0 1px 2px rgba(0, 0, 0, 0.9),
+      0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  .knob-gloss {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 46% 32% at 38% 22%, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 72%),
+      radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 58%, rgba(0, 0, 0, 0.38) 100%);
+  }
+  .dial-pointer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transition: transform 240ms cubic-bezier(0.3, 1.4, 0.5, 1);
+  }
+  .dial-dot {
+    position: absolute;
+    left: 141px;
+    top: 62px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff9f43;
+    box-shadow: 0 0 10px rgba(255, 159, 67, 0.8);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .knob,
+    .knob-face,
+    .arrow,
+    .dial-pointer {
+      transition: none;
+    }
   }
   .wheel {
     width: 40px;
