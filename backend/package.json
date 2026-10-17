@@ -1,0 +1,17 @@
+{
+  "name": "remote-app-backend",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Express API for remote_app",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0"
+  }
+}
