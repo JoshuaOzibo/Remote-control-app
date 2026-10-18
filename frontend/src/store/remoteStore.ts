@@ -1,9 +1,14 @@
 import { create } from "zustand";
 import { laptopNameFor } from "@/lib/network";
 import { load, save, STORAGE_KEYS } from "@/lib/storage";
-import type { ConnectionError, ConnectionStatus, Mode, RecentLaptop } from "@/types";
+import { MODES, type ConnectionError, type ConnectionStatus, type Mode, type RecentLaptop } from "@/types";
 
 const MAX_RECENT = 5;
+
+function savedMode(): Mode {
+  const mode = load<string>(STORAGE_KEYS.mode, "dial");
+  return MODES.find((known) => known === mode) ?? "dial";
+}
 
 type RemoteState = {
   status: ConnectionStatus;
@@ -63,7 +68,7 @@ export const useRemoteStore = create<RemoteState>((set, get) => ({
       address: load(STORAGE_KEYS.address, ""),
       pin: load(STORAGE_KEYS.pin, ""),
       recent: load<RecentLaptop[]>(STORAGE_KEYS.recent, []),
-      mode: load<Mode>(STORAGE_KEYS.mode, "dial") === "trackpad" ? "trackpad" : "dial",
+      mode: savedMode(),
       autoConnect: load<boolean>(STORAGE_KEYS.autoConnect, true) !== false,
       hydrated: true,
     });

@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleDot, PanelBottom } from "lucide-react";
+import { CircleDot, Grid3x3, PanelBottom } from "lucide-react";
 import { vibrate } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import { useRemoteStore } from "@/store/remoteStore";
@@ -9,9 +9,9 @@ import type { Mode } from "@/types";
 const OPTIONS: { mode: Mode; label: string; Icon: typeof CircleDot }[] = [
   { mode: "dial", label: "Dial", Icon: CircleDot },
   { mode: "trackpad", label: "Trackpad", Icon: PanelBottom },
+  { mode: "keypad", label: "Keypad", Icon: Grid3x3 },
 ];
 
-/** Dial | Trackpad switch. */
 export function SegmentedToggle() {
   const mode = useRemoteStore((s) => s.mode);
   const setMode = useRemoteStore((s) => s.setMode);
