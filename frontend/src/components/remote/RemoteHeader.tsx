@@ -4,17 +4,13 @@ import { Check, Laptop, Power } from "lucide-react";
 import Link from "next/link";
 import { icon } from "@/components/ui/icons";
 import { Key } from "@/components/ui/Key";
+import { StatusLine } from "@/components/ui/StatusLine";
 import { disconnect, useRemote } from "@/hooks/useRemote";
 import { useRepeatPress } from "@/hooks/useRepeatPress";
-import { connectionErrorText } from "@/lib/connectionErrors";
-import { useRemoteStore } from "@/store/remoteStore";
 
 export function RemoteHeader() {
-  const { status, error } = useRemote();
-  const laptopName = useRemoteStore((s) => s.recent[0]?.name ?? "My laptop");
+  const { status } = useRemote();
   const connectPress = useRepeatPress();
-
-  const line = statusLine(status, error, laptopName);
 
   return (
     <header className="flex h-14 items-center gap-3">
@@ -29,10 +25,7 @@ export function RemoteHeader() {
 
       <div className="flex min-w-0 grow flex-col gap-1">
         <div className="text-[18px] font-bold tracking-[-0.01em]">Remote</div>
-        <div className="flex items-center gap-1.5 text-[12px] text-muted">
-          <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: line.color, boxShadow: line.glow }} />
-          <span className="truncate">{line.text}</span>
-        </div>
+        <StatusLine />
       </div>
 
       {status === "connected" ? (
@@ -56,21 +49,4 @@ export function RemoteHeader() {
       )}
     </header>
   );
-}
-
-function statusLine(
-  status: ReturnType<typeof useRemote>["status"],
-  error: ReturnType<typeof useRemote>["error"],
-  laptopName: string,
-) {
-  switch (status) {
-    case "connected":
-      return { text: laptopName, color: "#4ADE80", glow: "0 0 8px rgba(74,222,128,.6)" };
-    case "connecting":
-      return { text: "Connecting…", color: "#FF9F43", glow: "0 0 8px rgba(255,159,67,.6)" };
-    case "error":
-      return { text: connectionErrorText(error), color: "#F0524F", glow: "none" };
-    default:
-      return { text: "Not connected", color: "#6B7280", glow: "none" };
-  }
 }

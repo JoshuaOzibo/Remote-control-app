@@ -1,18 +1,14 @@
 "use client";
 
-import { House, LayoutGrid, SlidersHorizontal } from "lucide-react";
+import { Ellipsis, LayoutGrid, SlidersHorizontal } from "lucide-react";
 import { icon } from "@/components/ui/icons";
 import { Key } from "@/components/ui/Key";
+import { KeyLink } from "@/components/ui/KeyLink";
 import { sendKey } from "@/hooks/useRemote";
 
-/** Desktop, Tasks, Settings, ESC. */
 export function SystemRow() {
   return (
     <section aria-label="System" className="grid grid-cols-4 gap-3">
-      <Key onPress={() => sendKey("desktop")} className="h-[72px]">
-        <House {...icon} />
-        <span className="cap">Desktop</span>
-      </Key>
       <Key onPress={() => sendKey("taskview")} className="h-[72px]">
         <LayoutGrid {...icon} />
         <span className="cap">Tasks</span>
@@ -25,6 +21,10 @@ export function SystemRow() {
         <span className="font-mono text-[15px] font-medium">ESC</span>
         <span className="cap">Exit</span>
       </Key>
+      <KeyLink href="/more/laptop/" aria-label="More laptop controls" className="h-[72px]">
+        <Ellipsis {...icon} />
+        <span className="cap">More</span>
+      </KeyLink>
     </section>
   );
 }
