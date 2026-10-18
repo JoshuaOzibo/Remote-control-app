@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { laptopNameFor } from "@/lib/network";
 import { load, save, STORAGE_KEYS } from "@/lib/storage";
 import type { ConnectionError, ConnectionStatus, Mode, RecentLaptop } from "@/types";
 
@@ -47,7 +48,7 @@ export const useRemoteStore = create<RemoteState>((set, get) => ({
 
   remember: (address, pin) => {
     const existing = get().recent.find((r) => r.address === address);
-    const entry: RecentLaptop = existing ?? { name: "My laptop", address };
+    const entry: RecentLaptop = existing ?? { name: laptopNameFor(address), address };
     const recent = [entry, ...get().recent.filter((r) => r.address !== address)].slice(0, MAX_RECENT);
     save(STORAGE_KEYS.address, address);
     save(STORAGE_KEYS.pin, pin);

@@ -69,7 +69,7 @@ export function ConnectForm() {
           <div className="text-[15px] font-semibold">Start the server on your laptop</div>
           <div className="text-[13px] leading-[1.45] text-muted">
             Run <span className="font-mono font-medium text-text">npm start</span>, then enter the address and PIN
-            it shows. Both devices must be on the same Wi-Fi.
+            it shows. Join the same Wi-Fi as the laptop, or the laptop&apos;s hotspot.
           </div>
         </div>
       </div>
