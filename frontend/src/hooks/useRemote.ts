@@ -1,11 +1,17 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { isCompletePin } from "@/components/ui/PinInput";
+import { fetchLaptopName } from "@/lib/laptopInfo";
+import { takeLaunchParams } from "@/lib/launchParams";
+import { normalizeAddress, pageLaptopAddress } from "@/lib/network";
 import { CLOSE_CODE, isServerMsg, type ClientMsg, type KeyName } from "@/lib/protocol";
 import { useRemoteStore } from "@/store/remoteStore";
 import type { ConnectionError } from "@/types";
 
 const RETRY_MS = 1000;
+const SETUP_PATH = "/setup/";
 
 const CLOSE_ERRORS: Partial<Record<number, ConnectionError>> = {
   [CLOSE_CODE.replaced]: "replaced",
@@ -13,23 +19,28 @@ const CLOSE_ERRORS: Partial<Record<number, ConnectionError>> = {
   [CLOSE_CODE.notSetUp]: "not-set-up",
 };
 
-// One socket for the whole app, so the Remote and Connect screens share a connection.
+type Target = { address: string; pin: string; setupCode: string | null };
+
+export type Transport = { send: (msg: ClientMsg) => boolean };
+
 let socket: WebSocket | null = null;
-let target: { address: string; pin: string } | null = null;
+let target: Target | null = null;
 let authed = false;
 let everAuthed = false;
+let setupAttempts = 0;
+let retryWithAuth = false;
 let retryTimer: ReturnType<typeof setTimeout> | undefined;
 let onAuthed: (() => void) | undefined;
-let autoConnectTried = false;
+let started = false;
+let transport: Transport | null = null;
 
 function toSocketUrl(address: string) {
-  const host = address
-    .trim()
-    .replace(/^(https?|wss?):\/\//, "")
-    .replace(/\/ws\/?$/, "")
-    .replace(/\/+$/, "");
   const scheme = window.location.protocol === "https:" ? "wss" : "ws";
-  return `${scheme}://${host}/ws`;
+  return `${scheme}://${normalizeAddress(address)}/ws`;
+}
+
+function firstMessage({ pin, setupCode }: Target): ClientMsg {
+  return setupCode ? { t: "setup", code: setupCode, pin } : { t: "auth", pin };
 }
 
 function stopRetrying(reason: ConnectionError) {
@@ -43,26 +54,40 @@ function scheduleRetry() {
   if (target) retryTimer = setTimeout(open, RETRY_MS);
 }
 
+function loggedIn(address: string, pin: string) {
+  authed = true;
+  everAuthed = true;
+  if (target) target.setupCode = null;
+  const store = useRemoteStore.getState();
+  store.remember(address, pin);
+  store.setSetupCode(null);
+  store.setStatus("connected");
+  onAuthed?.();
+  onAuthed = undefined;
+  fetchLaptopName(address).then((name) => {
+    if (name) useRemoteStore.getState().rename(address, name);
+  });
+}
+
 function open() {
   if (!target) return;
   const { address, pin } = target;
-  const store = useRemoteStore.getState();
 
   let ws: WebSocket;
   try {
     ws = new WebSocket(toSocketUrl(address));
   } catch {
-    // Malformed address: retrying won't help.
     target = null;
-    store.setStatus("error", "unreachable");
+    useRemoteStore.getState().setStatus("error", "unreachable");
     return;
   }
   socket = ws;
   authed = false;
 
   ws.onopen = () => {
-    if (ws !== socket) return;
-    ws.send(JSON.stringify({ t: "auth", pin } satisfies ClientMsg));
+    if (ws !== socket || !target) return;
+    if (target.setupCode) setupAttempts += 1;
+    ws.send(JSON.stringify(firstMessage(target)));
   };
 
   ws.onmessage = (event) => {
@@ -76,12 +101,10 @@ function open() {
     if (!isServerMsg(msg)) return;
 
     if (msg.ok) {
-      authed = true;
-      everAuthed = true;
-      useRemoteStore.getState().remember(address, pin);
-      useRemoteStore.getState().setStatus("connected");
-      onAuthed?.();
-      onAuthed = undefined;
+      loggedIn(address, pin);
+    } else if (msg.t === "setup" && msg.reason === "setup-expired" && setupAttempts > 1 && target) {
+      target.setupCode = null;
+      retryWithAuth = true;
     } else {
       stopRetrying(msg.reason ?? "wrong-pin");
       ws.close();
@@ -92,29 +115,42 @@ function open() {
     if (ws !== socket) return;
     socket = null;
     authed = false;
+    if (retryWithAuth) {
+      retryWithAuth = false;
+      open();
+      return;
+    }
     const closeError = CLOSE_ERRORS[event.code];
     if (closeError) stopRetrying(closeError);
     if (!target) return;
-    // A dropped working connection reconnects quietly; a laptop we never reached shows an error.
     if (everAuthed) useRemoteStore.getState().setStatus("connecting");
     else useRemoteStore.getState().setStatus("error", "unreachable");
     scheduleRetry();
   };
 }
 
-/** Opens a connection to `address` and authenticates with `pin`. Replaces any current connection. */
-export function connect(address: string, pin: string, onSuccess?: () => void) {
+function begin(next: Target, onSuccess?: () => void) {
   clearTimeout(retryTimer);
   const old = socket;
   socket = null;
   old?.close();
 
-  target = { address, pin };
+  target = next;
   authed = false;
   everAuthed = false;
+  setupAttempts = 0;
+  retryWithAuth = false;
   onAuthed = onSuccess;
   useRemoteStore.getState().setStatus("connecting");
   open();
+}
+
+export function connect(address: string, pin: string, onSuccess?: () => void) {
+  begin({ address, pin, setupCode: null }, onSuccess);
+}
+
+export function setUp(address: string, setupCode: string, pin: string, onSuccess?: () => void) {
+  begin({ address, pin, setupCode }, onSuccess);
 }
 
 export function disconnect() {
@@ -129,8 +165,12 @@ export function disconnect() {
   useRemoteStore.getState().setAutoConnect(false);
 }
 
-/** Sends a message if the socket is open and authenticated. Returns whether it was sent. */
+export function setTransport(next: Transport | null) {
+  transport = next;
+}
+
 export function send(msg: ClientMsg) {
+  if (transport) return transport.send(msg);
   if (!socket || !authed || socket.readyState !== WebSocket.OPEN) {
     if (process.env.NODE_ENV === "development") console.debug("[remote] not sent (offline)", msg);
     return false;
@@ -139,27 +179,39 @@ export function send(msg: ClientMsg) {
   return true;
 }
 
-/** Shorthand for `send({ t: "key", k })`. */
 export function sendKey(k: KeyName) {
   return send({ t: "key", k });
 }
 
-/**
- * Socket state plus actions. The first component to mount loads saved settings and
- * auto-connects to the last laptop.
- */
+function startUp(goToSetup: () => void) {
+  if (started) return;
+  started = true;
+  const store = useRemoteStore.getState();
+  store.hydrate();
+  if (transport) return;
+
+  const launch = takeLaunchParams();
+  if (launch.setupCode) {
+    store.setSetupCode(launch.setupCode);
+    if (window.location.pathname !== SETUP_PATH) goToSetup();
+    return;
+  }
+  if (launch.pin) {
+    connect(pageLaptopAddress(), launch.pin);
+    return;
+  }
+  const { address, pin, autoConnect } = useRemoteStore.getState();
+  if (autoConnect && !target && address && isCompletePin(pin)) connect(address, pin);
+}
+
 export function useRemote() {
+  const router = useRouter();
   const status = useRemoteStore((s) => s.status);
   const error = useRemoteStore((s) => s.error);
 
   useEffect(() => {
-    const store = useRemoteStore.getState();
-    store.hydrate();
-    if (autoConnectTried) return;
-    autoConnectTried = true;
-    const { address, pin, autoConnect } = useRemoteStore.getState();
-    if (autoConnect && !target && address && /^\d{4}$/.test(pin)) connect(address, pin);
-  }, []);
+    startUp(() => router.replace(SETUP_PATH));
+  }, [router]);
 
-  return { status, error, connect, disconnect, send };
+  return { status, error, connect, setUp, disconnect, send };
 }

@@ -15,4 +15,6 @@ export type Mode = (typeof MODES)[number];
 export type RecentLaptop = {
   name: string;
   address: string;
+  pin: string;
+  lastUsed: number;
 };

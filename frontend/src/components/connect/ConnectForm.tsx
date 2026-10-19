@@ -2,20 +2,17 @@
 
 import { ChevronLeft, Laptop } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 import { icon } from "@/components/ui/icons";
 import { Key } from "@/components/ui/Key";
 import { isCompletePin, PinInput } from "@/components/ui/PinInput";
 import { connect, useRemote } from "@/hooks/useRemote";
 import { connectionErrorText } from "@/lib/connectionErrors";
+import { isPageLaptop, laptopPageUrl, pageLaptopAddress } from "@/lib/network";
 import { useRemoteStore } from "@/store/remoteStore";
+import type { RecentLaptop } from "@/types";
+import { ForgotPin } from "./ForgotPin";
 import { RecentLaptops } from "./RecentLaptops";
-
-/** The page the laptop serves is on the same host; in dev the page runs on :3000 and the server on :3001. */
-function defaultAddress() {
-  if (process.env.NODE_ENV === "development") return `${window.location.hostname}:3001`;
-  return window.location.host;
-}
 
 export function ConnectForm() {
   const router = useRouter();
@@ -29,10 +26,9 @@ export function ConnectForm() {
   const [submitted, setSubmitted] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
 
-  // Prefill once saved values are loaded (client only, so window is available).
   if (hydrated && !prefilled) {
     setPrefilled(true);
-    setAddress(savedAddress || defaultAddress());
+    setAddress(savedAddress || pageLaptopAddress());
     setPin(savedPin);
   }
 
@@ -44,9 +40,19 @@ export function ConnectForm() {
     connect(addr.trim(), code, goHome);
   };
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = (e: SubmitEvent) => {
     e.preventDefault();
     start(address, pin);
+  };
+
+  const pick = (laptop: RecentLaptop) => {
+    if (!isPageLaptop(laptop.address)) {
+      window.location.href = laptopPageUrl(laptop.address, laptop.pin);
+      return;
+    }
+    setAddress(laptop.address);
+    if (isCompletePin(laptop.pin)) setPin(laptop.pin);
+    start(laptop.address, isCompletePin(laptop.pin) ? laptop.pin : pin);
   };
 
   const loading = submitted && status === "connecting";
@@ -58,7 +64,7 @@ export function ConnectForm() {
         <Key aria-label="Back to remote" onPress={goHome} className="h-12 w-12 shrink-0 rounded-3xl">
           <ChevronLeft {...icon} />
         </Key>
-        <h1 className="m-0 text-[18px] font-bold">Connect to laptop</h1>
+        <h1 className="m-0 text-[18px] font-bold">Enter PIN</h1>
       </header>
 
       <div className="flex items-center gap-3.5 rounded-[20px] border border-line bg-card p-[18px]">
@@ -66,15 +72,22 @@ export function ConnectForm() {
           <Laptop size={26} strokeWidth={1.8} aria-hidden />
         </div>
         <div className="flex flex-col gap-1">
-          <div className="text-[15px] font-semibold">Start the server on your laptop</div>
+          <div className="text-[15px] font-semibold">Open Phone Remote on your laptop</div>
           <div className="text-[13px] leading-[1.45] text-muted">
-            Run <span className="font-mono font-medium text-text">npm start</span>, then enter the address and PIN
-            it shows. Join the same Wi-Fi as the laptop, or the laptop&apos;s hotspot.
+            Scan its QR code with your phone&apos;s camera, or enter the PIN you chose for this laptop. Use the same
+            Wi-Fi as the laptop, or the laptop&apos;s hotspot.
           </div>
         </div>
       </div>
 
       <form onSubmit={onSubmit} className="contents">
+        <div className="flex flex-col gap-2.5">
+          <div className="label" id="pinlabel">
+            PIN
+          </div>
+          <PinInput value={pin} onChange={setPin} labelledBy="pinlabel" />
+        </div>
+
         <div className="flex flex-col gap-2.5">
           <label className="label" htmlFor="addr">
             Laptop address
@@ -91,13 +104,6 @@ export function ConnectForm() {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
           />
-        </div>
-
-        <div className="flex flex-col gap-2.5">
-          <div className="label" id="pinlabel">
-            PIN
-          </div>
-          <PinInput value={pin} onChange={setPin} labelledBy="pinlabel" />
         </div>
 
         <div className="flex flex-col gap-3">
@@ -117,12 +123,9 @@ export function ConnectForm() {
         </div>
       </form>
 
-      <RecentLaptops
-        onPick={(laptop) => {
-          setAddress(laptop.address);
-          start(laptop.address, isCompletePin(pin) ? pin : savedPin);
-        }}
-      />
+      <ForgotPin />
+
+      <RecentLaptops onPick={pick} />
     </>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useRemote } from "@/hooks/useRemote";
 import { connectionErrorText } from "@/lib/connectionErrors";
+import { laptopNameFor } from "@/lib/network";
 import { useRemoteStore } from "@/store/remoteStore";
 import type { ConnectionError, ConnectionStatus } from "@/types";
 
@@ -20,7 +21,9 @@ function describe(status: ConnectionStatus, error: ConnectionError | null, lapto
 
 export function StatusLine() {
   const { status, error } = useRemote();
-  const laptopName = useRemoteStore((s) => s.recent[0]?.name ?? "My laptop");
+  const laptopName = useRemoteStore(
+    (s) => s.recent.find((laptop) => laptop.address === s.address)?.name ?? laptopNameFor(s.address),
+  );
   const line = describe(status, error, laptopName);
 
   return (

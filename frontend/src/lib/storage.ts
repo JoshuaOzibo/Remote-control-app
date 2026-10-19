@@ -1,5 +1,3 @@
-// localStorage can throw (private mode, blocked storage), so every access is guarded.
-
 export const STORAGE_KEYS = {
   address: "remote.address",
   pin: "remote.pin",
@@ -21,6 +19,6 @@ export function save(key: string, value: unknown) {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // Ignore: the app still works, it just won't remember.
+    return;
   }
 }
