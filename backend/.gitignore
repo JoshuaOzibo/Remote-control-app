@@ -6,3 +6,6 @@ plan/
 
 # Built frontend, copied from frontend/out by npm run build:web
 public/
+
+# Saved PIN hash (npm run reset-pin deletes it)
+data/

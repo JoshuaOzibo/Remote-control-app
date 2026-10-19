@@ -3,7 +3,16 @@ import { config } from './config/env.js';
 import { releaseHeldKeys } from './features/input/input.keyboard.js';
 import { warnUnmappedKeys } from './features/input/input.keymap.js';
 import { revokeControl } from './features/remote/remote.controller.js';
-import { assertValidPin, getPin, setPin as storePin } from './features/remote/remote.pin.js';
+import {
+  applyPin,
+  currentSetupCode,
+  isPinFixed,
+  isSetUp,
+  onPinChange,
+  preparePin,
+  resetPin,
+} from './features/remote/remote.pin.js';
+import { createFilePinStore } from './features/remote/remote.pinStore.js';
 import { KEYS } from './features/remote/remote.protocol.js';
 import { attachRemoteSocket } from './features/remote/remote.socket.js';
 
@@ -24,18 +33,21 @@ async function startServer({
   port = config.port,
   host = config.host,
   pin = config.pin,
+  pinStore = createFilePinStore(config.pinFile),
   publicDir = config.publicDir,
   version = config.version,
 } = {}) {
   warnUnmappedKeys(KEYS);
-  assertValidPin(pin);
+  const preparedPin = await preparePin({ plainPin: pin, store: pinStore });
 
   const server = await listen(createApp({ publicDir, version }), port, host);
-  storePin(pin);
+  applyPin(preparedPin);
   const remote = attachRemoteSocket(server);
+  const pinListeners = new Set();
   let stopping = null;
 
   async function shutDown() {
+    for (const unsubscribe of pinListeners) unsubscribe();
     remote.close();
     await releaseHeldKeys();
     server.closeAllConnections();
@@ -46,10 +58,18 @@ async function startServer({
     port: server.address().port,
     host,
     publicDir,
-    getPin,
-    setPin(next) {
-      storePin(next);
+    isSetUp,
+    isPinFixed,
+    setupCode: currentSetupCode,
+    onPinChange(listener) {
+      const unsubscribe = onPinChange(listener);
+      pinListeners.add(unsubscribe);
+      return unsubscribe;
+    },
+    resetPin() {
+      const code = resetPin();
       revokeControl();
+      return code;
     },
     stop() {
       stopping ??= shutDown();
@@ -60,5 +80,7 @@ async function startServer({
 
 export { startServer };
 export { primaryLanAddress, networkAddresses } from './shared/network.js';
-export { randomPin, isValidPin } from './features/remote/remote.pin.js';
+export { isValidPin } from './features/remote/remote.pin.js';
+export { formatSetupCode } from './features/remote/remote.credentials.js';
+export { createFilePinStore } from './features/remote/remote.pinStore.js';
 export { setLogSink } from './shared/logger.js';

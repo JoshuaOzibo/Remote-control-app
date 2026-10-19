@@ -14,7 +14,8 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "build:web": "node scripts/build-web.js"
+    "build:web": "node scripts/build-web.js",
+    "reset-pin": "node scripts/reset-pin.js"
   },
   "dependencies": {
     "@nut-tree-fork/nut-js": "^4.2.6",

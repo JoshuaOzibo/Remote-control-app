@@ -7,6 +7,12 @@ import type { ConnectionError } from "@/types";
 
 const RETRY_MS = 1000;
 
+const CLOSE_ERRORS: Partial<Record<number, ConnectionError>> = {
+  [CLOSE_CODE.replaced]: "replaced",
+  [CLOSE_CODE.setupExpired]: "setup-expired",
+  [CLOSE_CODE.notSetUp]: "not-set-up",
+};
+
 // One socket for the whole app, so the Remote and Connect screens share a connection.
 let socket: WebSocket | null = null;
 let target: { address: string; pin: string } | null = null;
@@ -86,7 +92,8 @@ function open() {
     if (ws !== socket) return;
     socket = null;
     authed = false;
-    if (event.code === CLOSE_CODE.replaced) stopRetrying("replaced");
+    const closeError = CLOSE_ERRORS[event.code];
+    if (closeError) stopRetrying(closeError);
     if (!target) return;
     // A dropped working connection reconnects quietly; a laptop we never reached shows an error.
     if (everAuthed) useRemoteStore.getState().setStatus("connecting");

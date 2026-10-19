@@ -1,6 +1,12 @@
 export type ConnectionStatus = "idle" | "connecting" | "connected" | "error";
 
-export type ConnectionError = "wrong-pin" | "locked" | "replaced" | "unreachable";
+export type ConnectionError =
+  | "wrong-pin"
+  | "locked"
+  | "replaced"
+  | "unreachable"
+  | "not-set-up"
+  | "setup-expired";
 
 export const MODES = ["dial", "trackpad", "keypad"] as const;
 

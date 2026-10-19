@@ -1,5 +1,3 @@
-// Shared contract with backend/src/ws. Keep in sync with the protocol table in CLAUDE.md.
-
 export const KEYS = [
   "up",
   "down",
@@ -79,25 +77,36 @@ export type ClickButton = "left" | "right" | "double";
 
 export type ClientMsg =
   | { t: "auth"; pin: string }
+  | { t: "setup"; code: string; pin: string }
   | { t: "move"; dx: number; dy: number }
   | { t: "scroll"; dy: number }
   | { t: "click"; b: ClickButton }
   | { t: "key"; k: KeyName }
   | { t: "type"; text: string };
 
-export type AuthFailure = "wrong-pin" | "locked";
+export type AuthFailure = "wrong-pin" | "locked" | "not-set-up";
 
-export type ServerMsg = { t: "auth"; ok: true } | { t: "auth"; ok: false; reason?: AuthFailure };
+export type SetupFailure = "setup-expired" | "locked";
+
+export type ServerMsg =
+  | { t: "auth"; ok: true }
+  | { t: "auth"; ok: false; reason?: AuthFailure }
+  | { t: "setup"; ok: true }
+  | { t: "setup"; ok: false; reason?: SetupFailure };
 
 export const CLOSE_CODE = {
   replaced: 4002,
+  setupExpired: 4004,
+  notSetUp: 4005,
 } as const;
+
+const SERVER_MSG_TYPES: ReadonlySet<string> = new Set(["auth", "setup"]);
 
 export function isServerMsg(value: unknown): value is ServerMsg {
   return (
     typeof value === "object" &&
     value !== null &&
-    (value as ServerMsg).t === "auth" &&
+    SERVER_MSG_TYPES.has((value as ServerMsg).t) &&
     typeof (value as ServerMsg).ok === "boolean"
   );
 }

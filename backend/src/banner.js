@@ -1,4 +1,5 @@
 import { config } from './config/env.js';
+import { formatSetupCode } from './features/remote/remote.credentials.js';
 import { isWebBuilt } from './features/web/web.routes.js';
 import { log } from './shared/logger.js';
 import { WINDOWS_HOTSPOT_ADDRESS, networkAddresses, primaryLanAddress } from './shared/network.js';
@@ -17,11 +18,10 @@ function line(label, text) {
   return `    ${label.padEnd(16)}${text}`;
 }
 
-async function addressLines({ host, port }) {
+function addressLines({ host, port }, primary) {
   const urlFor = (address) => `http://${address}:${port}`;
   if (host !== ALL_INTERFACES) return [line(LABELS.host, urlFor(host))];
 
-  const primary = await primaryLanAddress();
   const addresses = networkAddresses()
     .filter(({ kind }) => SHOWN_KINDS.includes(kind))
     .sort((a, b) => Number(b.address === primary) - Number(a.address === primary));
@@ -35,10 +35,30 @@ async function addressLines({ host, port }) {
   return lines;
 }
 
+function pinLines(server, primary) {
+  if (server.isPinFixed()) return [`    PIN: ${config.pin}  (from backend/.env)`];
+  if (server.isSetUp()) return ['    PIN: set on your phone  (forgot it? npm run reset-pin, then restart)'];
+
+  const code = server.setupCode();
+  const host = server.host === ALL_INTERFACES ? (primary ?? '<laptop-ip>') : server.host;
+  return [
+    `    Setup code: ${formatSetupCode(code)}`,
+    `    Open http://${host}:${server.port}/?setup=${code} on your phone to choose a PIN`,
+  ];
+}
+
 async function printBanner(server) {
-  const pinNote = config.pinIsRandom ? '  (new each run; set PIN in backend/.env to keep one)' : '';
-  const lines = await addressLines(server);
-  console.log(['', `  remote_app  (${config.nodeEnv})`, ...lines, '', `    PIN: ${server.getPin()}${pinNote}`, ''].join('\n'));
+  const primary = await primaryLanAddress();
+  console.log(
+    [
+      '',
+      `  remote_app  (${config.nodeEnv})`,
+      ...addressLines(server, primary),
+      '',
+      ...pinLines(server, primary),
+      '',
+    ].join('\n'),
+  );
 
   if (!isWebBuilt(server.publicDir)) {
     log.warn('web', 'Frontend not built yet. Run: npm run build:web');

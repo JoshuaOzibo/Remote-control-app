@@ -5,6 +5,8 @@ const CONNECTION_ERROR_TEXT: Record<ConnectionError, string> = {
   locked: "Too many wrong PINs. Wait a minute",
   replaced: "Another device took over",
   unreachable: "Can't reach laptop",
+  "not-set-up": "Laptop needs a new PIN. Scan its setup QR",
+  "setup-expired": "Setup code expired. Reset the PIN on the laptop",
 };
 
 export function connectionErrorText(error: ConnectionError | null) {

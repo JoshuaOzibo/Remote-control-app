@@ -12,7 +12,7 @@ function releaseControl(socket) {
 }
 
 function revokeControl() {
-  controller?.close(CLOSE_CODE.wrongPin, 'PIN changed');
+  controller?.close(CLOSE_CODE.wrongPin, 'PIN reset');
   controller = null;
 }
 

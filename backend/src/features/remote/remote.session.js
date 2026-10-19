@@ -1,9 +1,9 @@
 import { log } from '../../shared/logger.js';
-import { checkPin } from './remote.auth.js';
 import { releaseControl, takeControl } from './remote.controller.js';
 import { dispatch } from './remote.dispatch.js';
 import { isLockedOut, recordFailure, recordSuccess } from './remote.lockout.js';
-import { CLOSE_CODE, authReply, parseMessage } from './remote.protocol.js';
+import { checkPin, choosePin, isSetUp } from './remote.pin.js';
+import { CLOSE_CODE, LOGIN_MESSAGES, authReply, parseMessage, setupReply } from './remote.protocol.js';
 import { createThrottle } from './remote.throttle.js';
 
 const AUTH_TIMEOUT_MS = 5000;
@@ -19,34 +19,66 @@ function startSession(socket, ip) {
     socket.close(CLOSE_CODE.authTimeout, 'Auth timeout');
   }, AUTH_TIMEOUT_MS);
 
-  function reject(reason, closeCode) {
+  const isOpen = () => socket.readyState === socket.OPEN;
+
+  function reject(reply, reason, closeCode) {
     state = 'rejected';
-    socket.send(authReply(false, reason));
+    socket.send(reply(false, reason));
     socket.close(closeCode, reason);
   }
 
-  function accept() {
+  function rejectFailure(reply, reason, closeCode, what) {
+    const lockedNow = recordFailure(ip);
+    log.warn('remote', `${ip} sent ${what}${lockedNow ? ', now locked out for 60s' : ''}`);
+    reject(reply, lockedNow ? 'locked' : reason, lockedNow ? CLOSE_CODE.lockedOut : closeCode);
+  }
+
+  function rejectIfLocked(reply) {
+    if (!isLockedOut(ip)) return false;
+    log.warn('remote', `${ip} is locked out after too many wrong attempts`);
+    reject(reply, 'locked', CLOSE_CODE.lockedOut);
+    return true;
+  }
+
+  function accept(reply) {
     state = 'authed';
     recordSuccess(ip);
-    socket.send(authReply(true));
+    socket.send(reply(true));
     takeControl(socket);
     log.info('remote', `${ip} connected`);
   }
 
-  function authenticate({ pin }) {
+  async function authenticate({ pin }) {
+    if (rejectIfLocked(authReply)) return;
+    if (!isSetUp()) {
+      log.info('remote', `${ip} tried to log in, but no PIN is set yet`);
+      reject(authReply, 'not-set-up', CLOSE_CODE.notSetUp);
+      return;
+    }
+    state = 'checking';
+    const ok = await checkPin(pin);
+    if (!isOpen()) return;
+    if (ok) accept(authReply);
+    else rejectFailure(authReply, 'wrong-pin', CLOSE_CODE.wrongPin, 'a wrong PIN');
+  }
+
+  async function setUp({ code, pin }) {
+    if (rejectIfLocked(setupReply)) return;
+    state = 'checking';
+    const ok = await choosePin(code, pin);
+    if (ok) log.info('remote', `${ip} set a new PIN`);
+    if (!isOpen()) return;
+    if (ok) accept(setupReply);
+    else rejectFailure(setupReply, 'setup-expired', CLOSE_CODE.setupExpired, 'a wrong or used setup code');
+  }
+
+  function logIn(login, message) {
     clearTimeout(authTimer);
-    if (isLockedOut(ip)) {
-      log.warn('remote', `${ip} is locked out after too many wrong PINs`);
-      reject('locked', CLOSE_CODE.lockedOut);
-      return;
-    }
-    if (checkPin(pin)) {
-      accept();
-      return;
-    }
-    const lockedNow = recordFailure(ip);
-    log.warn('remote', `${ip} sent a wrong PIN${lockedNow ? ', now locked out for 60s' : ''}`);
-    reject(lockedNow ? 'locked' : 'wrong-pin', lockedNow ? CLOSE_CODE.lockedOut : CLOSE_CODE.wrongPin);
+    login(message).catch((error) => {
+      log.error('remote', `${ip} login failed:`, error);
+      state = 'rejected';
+      socket.close(CLOSE_CODE.serverError, 'Server error');
+    });
   }
 
   function handleMessage(raw, isBinary) {
@@ -60,8 +92,9 @@ function startSession(socket, ip) {
       log.debug('remote', `${ip} sent an invalid message`);
       return;
     }
-    if (state === 'pending' && message.t === 'auth') authenticate(message);
-    else if (state === 'authed' && message.t !== 'auth') dispatch(message);
+    if (state === 'pending' && message.t === 'auth') logIn(authenticate, message);
+    else if (state === 'pending' && message.t === 'setup') logIn(setUp, message);
+    else if (state === 'authed' && !LOGIN_MESSAGES.has(message.t)) dispatch(message);
   }
 
   socket.on('message', handleMessage);

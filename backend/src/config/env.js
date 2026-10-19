@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
-import { isValidPin, randomPin } from '../features/remote/remote.pin.js';
 
 const backendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -16,16 +15,12 @@ const config = {
   host: process.env.HOST || '0.0.0.0',
   nodeEnv: process.env.NODE_ENV || 'development',
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  pin: pinFromEnv || randomPin(),
-  pinIsRandom: !pinFromEnv,
+  pin: pinFromEnv || null,
+  pinFile: path.join(backendRoot, 'data', 'pin.json'),
   publicDir: path.join(backendRoot, 'public'),
   version,
 };
 
 config.isProduction = config.nodeEnv === 'production';
-
-if (!isValidPin(config.pin)) {
-  throw new Error(`PIN in backend/.env must be exactly 4 digits (got "${config.pin}")`);
-}
 
 export { config };
