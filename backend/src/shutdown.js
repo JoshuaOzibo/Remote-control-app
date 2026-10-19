@@ -1,9 +1,8 @@
-import { releaseHeldKeys } from './features/input/input.keyboard.js';
 import { log } from './shared/logger.js';
 
 const FORCE_EXIT_MS = 2000;
 
-function registerShutdown(server, getRemote) {
+function registerShutdown(server) {
   let stopping = false;
 
   async function stop(exitCode) {
@@ -11,10 +10,8 @@ function registerShutdown(server, getRemote) {
     stopping = true;
     setTimeout(() => process.exit(exitCode), FORCE_EXIT_MS).unref();
 
-    getRemote()?.close();
-    await releaseHeldKeys();
-    server.closeAllConnections();
-    server.close(() => process.exit(exitCode));
+    await server.stop();
+    process.exit(exitCode);
   }
 
   process.once('SIGINT', () => stop(0));

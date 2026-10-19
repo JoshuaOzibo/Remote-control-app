@@ -11,4 +11,9 @@ function releaseControl(socket) {
   if (controller === socket) controller = null;
 }
 
-export { takeControl, releaseControl };
+function revokeControl() {
+  controller?.close(CLOSE_CODE.wrongPin, 'PIN changed');
+  controller = null;
+}
+
+export { takeControl, releaseControl, revokeControl };

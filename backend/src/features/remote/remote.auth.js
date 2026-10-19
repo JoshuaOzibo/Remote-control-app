@@ -1,10 +1,10 @@
 import crypto from 'crypto';
-import { config } from '../../config/env.js';
+import { getPin } from './remote.pin.js';
 
 function checkPin(given) {
-  const expected = Buffer.from(config.pin);
+  const expected = Buffer.from(getPin() ?? '');
   const actual = Buffer.from(String(given));
-  return actual.length === expected.length && crypto.timingSafeEqual(actual, expected);
+  return expected.length > 0 && actual.length === expected.length && crypto.timingSafeEqual(actual, expected);
 }
 
 export { checkPin };

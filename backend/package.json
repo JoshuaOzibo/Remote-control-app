@@ -3,8 +3,14 @@
   "private": true,
   "type": "module",
   "version": "0.1.0",
-  "description": "Express API for remote_app",
-  "main": "src/index.js",
+  "description": "Laptop server for Phone Remote",
+  "main": "src/server.js",
+  "exports": {
+    ".": "./src/server.js"
+  },
+  "files": [
+    "src"
+  ],
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",

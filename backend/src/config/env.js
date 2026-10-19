@@ -1,27 +1,30 @@
+import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
+import { isValidPin, randomPin } from '../features/remote/remote.pin.js';
 
 const backendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 dotenv.config({ path: path.join(backendRoot, '.env'), quiet: true });
 
-const DEFAULT_PIN = '1234';
-const PIN_FORMAT = /^\d{4}$/;
+const { version } = JSON.parse(fs.readFileSync(path.join(backendRoot, 'package.json'), 'utf8'));
+const pinFromEnv = String(process.env.PIN ?? '').trim();
 
 const config = {
   port: Number(process.env.PORT) || 3001,
   host: process.env.HOST || '0.0.0.0',
   nodeEnv: process.env.NODE_ENV || 'development',
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  pin: String(process.env.PIN || DEFAULT_PIN).trim(),
-  usingDefaultPin: !process.env.PIN,
+  pin: pinFromEnv || randomPin(),
+  pinIsRandom: !pinFromEnv,
   publicDir: path.join(backendRoot, 'public'),
+  version,
 };
 
 config.isProduction = config.nodeEnv === 'production';
 
-if (!PIN_FORMAT.test(config.pin)) {
+if (!isValidPin(config.pin)) {
   throw new Error(`PIN in backend/.env must be exactly 4 digits (got "${config.pin}")`);
 }
 

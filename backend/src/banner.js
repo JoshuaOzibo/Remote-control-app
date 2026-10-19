@@ -1,7 +1,7 @@
 import { config } from './config/env.js';
 import { isWebBuilt } from './features/web/web.routes.js';
 import { log } from './shared/logger.js';
-import { WINDOWS_HOTSPOT_ADDRESS, networkAddresses } from './shared/network.js';
+import { WINDOWS_HOTSPOT_ADDRESS, networkAddresses, primaryLanAddress } from './shared/network.js';
 
 const ALL_INTERFACES = '0.0.0.0';
 const SHOWN_KINDS = ['lan', 'hotspot'];
@@ -13,18 +13,18 @@ const LABELS = {
   host: 'Address',
 };
 
-function urlFor(host) {
-  return `http://${host}:${config.port}`;
-}
-
 function line(label, text) {
   return `    ${label.padEnd(16)}${text}`;
 }
 
-function addressLines() {
-  if (config.host !== ALL_INTERFACES) return [line(LABELS.host, urlFor(config.host))];
+async function addressLines({ host, port }) {
+  const urlFor = (address) => `http://${address}:${port}`;
+  if (host !== ALL_INTERFACES) return [line(LABELS.host, urlFor(host))];
 
-  const addresses = networkAddresses().filter(({ kind }) => SHOWN_KINDS.includes(kind));
+  const primary = await primaryLanAddress();
+  const addresses = networkAddresses()
+    .filter(({ kind }) => SHOWN_KINDS.includes(kind))
+    .sort((a, b) => Number(b.address === primary) - Number(a.address === primary));
   const hotspotOn = addresses.some(({ kind }) => kind === 'hotspot');
   const lines = addresses.map(({ kind, address }) => line(LABELS[kind], urlFor(address)));
 
@@ -35,13 +35,12 @@ function addressLines() {
   return lines;
 }
 
-function printBanner() {
-  console.log(['', `  remote_app  (${config.nodeEnv})`, ...addressLines(), '', `    PIN: ${config.pin}`, ''].join('\n'));
+async function printBanner(server) {
+  const pinNote = config.pinIsRandom ? '  (new each run; set PIN in backend/.env to keep one)' : '';
+  const lines = await addressLines(server);
+  console.log(['', `  remote_app  (${config.nodeEnv})`, ...lines, '', `    PIN: ${server.getPin()}${pinNote}`, ''].join('\n'));
 
-  if (config.usingDefaultPin) {
-    log.warn('config', 'Using the default PIN. Set PIN in backend/.env');
-  }
-  if (!isWebBuilt()) {
+  if (!isWebBuilt(server.publicDir)) {
     log.warn('web', 'Frontend not built yet. Run: npm run build:web');
   }
 }
