@@ -44,7 +44,7 @@ function startSession(socket, ip) {
     state = 'authed';
     recordSuccess(ip);
     socket.send(reply(true));
-    takeControl(socket);
+    takeControl(socket, ip);
     log.info('remote', `${ip} connected`);
   }
 

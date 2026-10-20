@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; img-src data:; style-src 'self'; script-src 'self'"
+    />
+    <title>Phone Remote</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-mode="loading" data-phone="off">
+    <main class="panel">
+      <header class="top">
+        <div class="brand"><span class="logo" aria-hidden="true"></span>Phone Remote</div>
+        <span class="badge" id="badge">Starting</span>
+      </header>
+
+      <div class="intro">
+        <h1 id="title">Starting…</h1>
+        <p class="lead" id="lead"></p>
+      </div>
+
+      <section class="qr-card" id="qr-card" hidden>
+        <img id="qr" alt="QR code that opens the remote on your phone" />
+      </section>
+
+      <div class="setup-code" id="setup-code-box" hidden>
+        <span class="label">Setup code</span>
+        <span class="code" id="setup-code"></span>
+      </div>
+
+      <div class="url" id="url" hidden></div>
+
+      <button class="btn" id="copy" type="button" disabled>Copy link</button>
+
+      <section class="warning" id="warning" role="alert" hidden>
+        <strong>This Wi-Fi is set to Public</strong>
+        <span>Windows may block your phone. Set this network to Private.</span>
+        <button class="link" id="wifi-settings" type="button">Open Wi-Fi settings</button>
+      </section>
+
+      <footer class="foot">
+        <span class="phone"><span class="dot" aria-hidden="true"></span><span id="phone">No phone connected</span></span>
+        <button class="link" id="reset" type="button" hidden>Forgot PIN? Reset PIN</button>
+      </footer>
+      <div class="version" id="version"></div>
+    </main>
+    <script src="qr.js"></script>
+  </body>
+</html>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#22262D"/>
+      <stop offset="1" stop-color="#0D0E11"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3A3F49"/>
+      <stop offset="1" stop-color="#1C1F25"/>
+    </linearGradient>
+    <radialGradient id="knob" cx="0.38" cy="0.32" r="0.75">
+      <stop offset="0" stop-color="#FFC48A"/>
+      <stop offset="0.55" stop-color="#FF9F43"/>
+      <stop offset="1" stop-color="#C46A1C"/>
+    </radialGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#tile)"/>
+  <rect x="16.5" y="16.5" width="479" height="479" rx="111.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="3"/>
+  <circle cx="256" cy="256" r="168" fill="url(#ring)"/>
+  <circle cx="256" cy="256" r="168" fill="none" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="4"/>
+  <path d="M256 108 l20 26 h-40 z" fill="#FF9F43"/>
+  <path d="M256 404 l20 -26 h-40 z" fill="#5B616D"/>
+  <path d="M108 256 l26 -20 v40 z" fill="#5B616D"/>
+  <path d="M404 256 l-26 -20 v40 z" fill="#5B616D"/>
+  <circle cx="256" cy="262" r="92" fill="#08090B" fill-opacity="0.55"/>
+  <circle cx="256" cy="256" r="92" fill="url(#knob)"/>
+</svg>
