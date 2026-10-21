@@ -1,5 +1,5 @@
 import path from 'path';
-import { app } from 'electron';
+import { app, clipboard } from 'electron';
 
 const FIRST_PORT = 3001;
 const LAST_PORT = 3010;
@@ -9,6 +9,11 @@ function webDirectory() {
   return path.resolve(import.meta.dirname, '../../backend/public');
 }
 
+const electronClipboard = {
+  getContent: () => clipboard.readText(),
+  setContent: (text) => clipboard.writeText(text),
+};
+
 function candidatePorts(preferredPort) {
   const range = Array.from({ length: LAST_PORT - FIRST_PORT + 1 }, (_, i) => FIRST_PORT + i);
   return [...new Set([preferredPort, ...range])];
@@ -16,7 +21,14 @@ function candidatePorts(preferredPort) {
 
 async function startHost({ backend, preferredPort }) {
   const pinStore = backend.createFilePinStore(path.join(app.getPath('userData'), 'pin.json'));
-  const options = { host: '0.0.0.0', pin: null, pinStore, publicDir: webDirectory(), version: app.getVersion() };
+  const options = {
+    host: '0.0.0.0',
+    pin: null,
+    pinStore,
+    publicDir: webDirectory(),
+    version: app.getVersion(),
+    clipboard: electronClipboard,
+  };
 
   for (const port of candidatePorts(preferredPort)) {
     try {

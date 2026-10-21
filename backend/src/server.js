@@ -1,5 +1,6 @@
 import { createApp } from './app.js';
 import { config } from './config/env.js';
+import { useClipboard } from './features/input/input.clipboard.js';
 import { releaseHeldKeys } from './features/input/input.keyboard.js';
 import { warnUnmappedKeys } from './features/input/input.keymap.js';
 import { currentControllerIp, onControlChange, revokeControl } from './features/remote/remote.controller.js';
@@ -36,12 +37,14 @@ async function startServer({
   pinStore = createFilePinStore(config.pinFile),
   publicDir = config.publicDir,
   version = config.version,
+  clipboard,
 } = {}) {
   warnUnmappedKeys(KEYS);
   const preparedPin = await preparePin({ plainPin: pin, store: pinStore });
 
   const server = await listen(createApp({ publicDir, version }), port, host);
   applyPin(preparedPin);
+  useClipboard(clipboard);
   const remote = attachRemoteSocket(server);
   const subscriptions = new Set();
   let stopping = null;

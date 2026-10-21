@@ -11,6 +11,7 @@ backend/node_modules/
 # Build files
 dist/
 build/
+!desktop/build/
 coverage/
 
 # Logs

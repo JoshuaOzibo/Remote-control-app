@@ -1,0 +1,49 @@
+appId: com.joshuaozibo.phoneremote
+productName: Phone Remote
+copyright: Copyright © 2026 Joshua Ozibo
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - src/**
+  - renderer/**
+  - assets/**
+  - package.json
+  - "!node_modules/remote-app-backend/**"
+  - node_modules/remote-app-backend/package.json
+  - node_modules/remote-app-backend/src/**
+  - "!**/.env"
+  - "!**/.env.*"
+  - "!node_modules/@nut-tree-fork/libnut-darwin/**"
+  - "!node_modules/@nut-tree-fork/libnut-linux/**"
+  - "!node_modules/jimp/browser/**"
+
+extraResources:
+  - from: ../backend/public
+    to: web
+
+asarUnpack:
+  - node_modules/@nut-tree-fork/libnut-win32/**
+  - node_modules/clipboardy/fallbacks/**
+  - "**/*.node"
+
+win:
+  icon: assets/icon.png
+  target:
+    - target: nsis
+      arch: [x64]
+
+nsis:
+  oneClick: false
+  perMachine: true
+  allowElevation: true
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Phone Remote
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false
+  include: build/installer.nsh
+  artifactName: PhoneRemote-Setup.${ext}

@@ -1,6 +1,7 @@
 import { setTimeout as sleep } from 'timers/promises';
+import { readClipboard, writeClipboard } from './input.clipboard.js';
 import { KEYMAP } from './input.keymap.js';
-import { Key, clipboard, keyboard } from './input.nut.js';
+import { Key, keyboard } from './input.nut.js';
 import { enqueue } from './input.queue.js';
 import { segmentText } from './input.text.js';
 
@@ -31,11 +32,11 @@ async function pressCombo(combo) {
 }
 
 async function pasteText(text) {
-  const previous = await clipboard.getContent().catch(() => '');
-  await clipboard.setContent(text);
+  const previous = await readClipboard().catch(() => '');
+  await writeClipboard(text);
   await pressCombo([Key.LeftControl, Key.V]);
   await sleep(PASTE_SETTLE_MS);
-  if (previous) await clipboard.setContent(previous);
+  if (previous) await writeClipboard(previous);
 }
 
 const writers = {

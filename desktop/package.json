@@ -7,13 +7,19 @@
   "type": "module",
   "main": "src/main.js",
   "scripts": {
-    "dev": "node scripts/dev.js"
+    "dev": "node scripts/dev.js",
+    "build:web": "npm --prefix ../backend run build:web",
+    "pack": "electron-builder --win --dir",
+    "dist": "npm run build:web && electron-builder --win"
   },
   "dependencies": {
     "qrcode": "^1.5.4",
     "remote-app-backend": "file:../backend"
   },
   "devDependencies": {
-    "electron": "^44.9.1"
-  }
+    "electron": "^44.9.1",
+    "electron-builder": "^26.15.3"
+  },
+  "author": "Joshua Ozibo",
+  "homepage": "https://github.com/JoshuaOzibo/Remote-control-app"
 }
