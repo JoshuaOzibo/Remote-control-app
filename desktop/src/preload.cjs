@@ -10,4 +10,5 @@ contextBridge.exposeInMainWorld('phoneRemote', {
   copyLink: () => ipcRenderer.invoke('copy-link'),
   resetPin: () => ipcRenderer.invoke('reset-pin'),
   openWifiSettings: () => ipcRenderer.invoke('open-wifi-settings'),
+  openUpdate: () => ipcRenderer.invoke('open-update'),
 });

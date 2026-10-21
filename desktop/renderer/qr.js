@@ -42,6 +42,8 @@ function render(state) {
   $("reset").hidden = state.mode !== "ready";
   $("phone").textContent = state.controller ? `Phone connected · ${state.controller}` : "No phone connected";
   $("version").textContent = `v${state.version} · port ${state.port}`;
+  $("update").hidden = !state.update;
+  $("update").textContent = state.update ? `· Update to v${state.update}` : "";
 }
 
 $("copy").addEventListener("click", async () => {
@@ -54,5 +56,6 @@ $("copy").addEventListener("click", async () => {
 });
 $("reset").addEventListener("click", () => window.phoneRemote.resetPin());
 $("wifi-settings").addEventListener("click", () => window.phoneRemote.openWifiSettings());
+$("update").addEventListener("click", () => window.phoneRemote.openUpdate());
 
 window.phoneRemote.onState(render);

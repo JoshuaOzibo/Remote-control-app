@@ -9,6 +9,7 @@ import { createQrWindow } from './qrWindow.js';
 import { linkFor, startHost } from './serverHost.js';
 import { loadSettings, saveSettings } from './settings.js';
 import { createTray } from './tray.js';
+import { watchForUpdates } from './updateCheck.js';
 
 const APP_ID = 'com.joshuaozibo.phoneremote';
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -27,6 +28,7 @@ let qrWindow;
 let writeLog = () => {};
 let address = null;
 let publicNetwork = false;
+let update = null;
 let state = null;
 let stopping = false;
 let stopped = false;
@@ -44,7 +46,12 @@ async function buildState() {
     publicNetwork,
     controller: server.controllerIp(),
     version: app.getVersion(),
+    update: update?.version ?? null,
   };
+}
+
+function openUpdate() {
+  if (update) shell.openExternal(update.url);
 }
 
 function tooltipFor({ mode, address: shownAddress, port, controller }) {
@@ -57,7 +64,12 @@ function tooltipFor({ mode, address: shownAddress, port, controller }) {
 async function publish() {
   state = await buildState();
   qrWindow.send(state);
-  tray.update({ tooltip: tooltipFor(state), setupMode: state.mode === 'setup', openAtLogin: isOpenAtLogin() });
+  tray.update({
+    tooltip: tooltipFor(state),
+    setupMode: state.mode === 'setup',
+    openAtLogin: isOpenAtLogin(),
+    update: state.update,
+  });
 }
 
 async function refreshNetworkProfile() {
@@ -97,6 +109,7 @@ function registerIpc() {
   ipcMain.handle('copy-link', () => copyLink());
   ipcMain.handle('reset-pin', () => confirmResetPin());
   ipcMain.handle('open-wifi-settings', () => shell.openExternal(WIFI_SETTINGS_URL));
+  ipcMain.handle('open-update', () => openUpdate());
 }
 
 async function start() {
@@ -126,6 +139,7 @@ async function start() {
       show: () => qrWindow.show(),
       copyLink,
       resetPin: confirmResetPin,
+      openUpdate,
       setOpenAtLogin: (openAtLogin) => {
         setOpenAtLogin(openAtLogin);
         publish();
@@ -146,6 +160,15 @@ async function start() {
   });
   refreshNetworkProfile();
   setInterval(refreshNetworkProfile, PROFILE_CHECK_MS);
+  watchForUpdates({
+    currentVersion: app.getVersion(),
+    onUpdate: (release) => {
+      update = release;
+      writeLog('info', 'app', [`Update available: ${release.version}`]);
+      publish();
+    },
+    onError: (error) => writeLog('debug', 'app', ['Update check failed:', error.message]),
+  });
 
   if (!startedHidden() || !server.isSetUp()) qrWindow.show();
   writeLog('info', 'app', [`Phone Remote ${app.getVersion()} started on port ${server.port}`]);

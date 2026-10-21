@@ -21,5 +21,9 @@
     "electron-builder": "^26.15.3"
   },
   "author": "Joshua Ozibo",
-  "homepage": "https://github.com/JoshuaOzibo/Remote-control-app"
+  "homepage": "https://github.com/JoshuaOzibo/Remote-control-app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JoshuaOzibo/Remote-control-app.git"
+  }
 }

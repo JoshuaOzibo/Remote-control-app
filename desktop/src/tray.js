@@ -18,10 +18,14 @@ function createTray({ iconPath, actions }) {
   const tray = new Tray(trayImage(iconPath));
   tray.on('click', actions.show);
 
-  function update({ tooltip, setupMode, openAtLogin }) {
+  function update({ tooltip, setupMode, openAtLogin, update: newVersion }) {
+    const updateItems = newVersion
+      ? [{ label: `Update available (v${newVersion})…`, click: actions.openUpdate }, { type: 'separator' }]
+      : [];
     tray.setToolTip(tooltip);
     tray.setContextMenu(
       Menu.buildFromTemplate([
+        ...updateItems,
         { label: setupMode ? 'Show setup QR code' : 'Show QR code', click: actions.show },
         { label: 'Copy link', click: actions.copyLink },
         { label: 'Reset PIN…', click: actions.resetPin },

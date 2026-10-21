@@ -253,8 +253,15 @@ body[data-phone="on"] .dot {
 }
 
 .version {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
   font-family: var(--mono);
   font-size: 11px;
   color: #5b616d;
+}
+
+.link.update {
+  font-family: var(--mono);
+  font-size: 11px;
 }
