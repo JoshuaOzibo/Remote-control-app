@@ -7,6 +7,7 @@ import { fetchLaptopName } from "@/lib/laptopInfo";
 import { takeLaunchParams } from "@/lib/launchParams";
 import { normalizeAddress, pageLaptopAddress } from "@/lib/network";
 import { CLOSE_CODE, isServerMsg, type ClientMsg, type KeyName } from "@/lib/protocol";
+import { IS_SITE } from "@/lib/site";
 import { useRemoteStore } from "@/store/remoteStore";
 import type { ConnectionError } from "@/types";
 
@@ -188,7 +189,7 @@ function startUp(goToSetup: () => void) {
   started = true;
   const store = useRemoteStore.getState();
   store.hydrate();
-  if (transport) return;
+  if (transport || IS_SITE) return;
 
   const launch = takeLaunchParams();
   if (launch.setupCode) {

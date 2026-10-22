@@ -13,7 +13,13 @@ const SHORTCUTS: { k: KeyName; label: string; color: string }[] = [
 
 const MORE_BAR_COLOR = "#5B616E";
 
-export function QuickShortcuts() {
+export function QuickShortcuts({ onMore }: { onMore?: () => void }) {
+  const moreContent = (
+    <>
+      <span className="h-[5px] w-7 rounded-[3px]" style={{ background: MORE_BAR_COLOR }} />
+      <span className="cap text-text">More</span>
+    </>
+  );
   return (
     <section aria-label="Quick shortcuts" className="flex flex-col gap-2.5">
       <div className="label">Quick shortcuts</div>
@@ -24,10 +30,15 @@ export function QuickShortcuts() {
             <span className="cap text-text">{label}</span>
           </Key>
         ))}
-        <KeyLink href="/more/shortcuts/" aria-label="More shortcuts" className="h-16 gap-2 rounded-2xl">
-          <span className="h-[5px] w-7 rounded-[3px]" style={{ background: MORE_BAR_COLOR }} />
-          <span className="cap text-text">More</span>
-        </KeyLink>
+        {onMore ? (
+          <Key onPress={onMore} aria-label="More shortcuts" className="h-16 gap-2 rounded-2xl">
+            {moreContent}
+          </Key>
+        ) : (
+          <KeyLink href="/more/shortcuts/" aria-label="More shortcuts" className="h-16 gap-2 rounded-2xl">
+            {moreContent}
+          </KeyLink>
+        )}
       </div>
     </section>
   );

@@ -6,7 +6,14 @@ import { Key } from "@/components/ui/Key";
 import { KeyLink } from "@/components/ui/KeyLink";
 import { sendKey } from "@/hooks/useRemote";
 
-export function SystemRow() {
+export function SystemRow({ onMore }: { onMore?: () => void }) {
+  const moreContent = (
+    <>
+      <Ellipsis {...icon} />
+      <span className="cap">More</span>
+    </>
+  );
+
   return (
     <section aria-label="System" className="grid grid-cols-4 gap-3">
       <Key onPress={() => sendKey("taskview")} className="h-[72px]">
@@ -21,10 +28,15 @@ export function SystemRow() {
         <span className="font-mono text-[15px] font-medium">ESC</span>
         <span className="cap">Exit</span>
       </Key>
-      <KeyLink href="/more/laptop/" aria-label="More laptop controls" className="h-[72px]">
-        <Ellipsis {...icon} />
-        <span className="cap">More</span>
-      </KeyLink>
+      {onMore ? (
+        <Key onPress={onMore} aria-label="More laptop controls" className="h-[72px]">
+          {moreContent}
+        </Key>
+      ) : (
+        <KeyLink href="/more/laptop/" aria-label="More laptop controls" className="h-[72px]">
+          {moreContent}
+        </KeyLink>
+      )}
     </section>
   );
 }
