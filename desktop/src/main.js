@@ -6,7 +6,7 @@ import { isOpenAtLogin, setOpenAtLogin, startedHidden } from './loginItem.js';
 import { isPublicNetwork } from './netProfile.js';
 import { watchNetwork } from './networkWatch.js';
 import { createQrWindow } from './qrWindow.js';
-import { linkFor, startHost } from './serverHost.js';
+import { hostFor, linkFor, startHost } from './serverHost.js';
 import { loadSettings, saveSettings } from './settings.js';
 import { createTray } from './tray.js';
 import { watchForUpdates } from './updateCheck.js';
@@ -56,7 +56,7 @@ function openUpdate() {
 
 function tooltipFor({ mode, address: shownAddress, port, controller }) {
   if (!shownAddress) return 'Phone Remote · no Wi-Fi';
-  const where = `${shownAddress}:${port}`;
+  const where = hostFor(shownAddress, port);
   if (mode === 'setup') return `Phone Remote · waiting for setup · ${where}`;
   return controller ? `Phone Remote · phone connected · ${where}` : `Phone Remote · ready · ${where}`;
 }

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { app } from 'electron';
 
-const DEFAULTS = { port: 3001, firstRunDone: false };
+const DEFAULTS = { port: 80 };
 
 function settingsFile() {
   return path.join(app.getPath('userData'), 'settings.json');

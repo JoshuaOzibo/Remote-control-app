@@ -1,8 +1,10 @@
 import path from 'path';
 import { app, clipboard } from 'electron';
 
+const WEB_PORT = 80;
 const FIRST_PORT = 3001;
 const LAST_PORT = 3010;
+const PORT_TAKEN = new Set(['EADDRINUSE', 'EACCES']);
 
 function webDirectory() {
   if (app.isPackaged) return path.join(process.resourcesPath, 'web');
@@ -14,9 +16,9 @@ const electronClipboard = {
   setContent: (text) => clipboard.writeText(text),
 };
 
-function candidatePorts(preferredPort) {
+function candidatePorts(savedPort) {
   const range = Array.from({ length: LAST_PORT - FIRST_PORT + 1 }, (_, i) => FIRST_PORT + i);
-  return [...new Set([preferredPort, ...range])];
+  return [...new Set([WEB_PORT, savedPort, ...range])];
 }
 
 async function startHost({ backend, preferredPort }) {
@@ -34,16 +36,22 @@ async function startHost({ backend, preferredPort }) {
     try {
       return await backend.startServer({ ...options, port });
     } catch (error) {
-      if (error.code !== 'EADDRINUSE') throw error;
+      if (!PORT_TAKEN.has(error.code)) throw error;
     }
   }
-  throw new Error(`Ports ${FIRST_PORT}–${LAST_PORT} are all in use. Close the other program using them and start Phone Remote again.`);
+  throw new Error(
+    `Ports ${WEB_PORT} and ${FIRST_PORT}–${LAST_PORT} are all in use. Close the other program using them and start Phone Remote again.`,
+  );
+}
+
+function hostFor(address, port) {
+  return port === WEB_PORT ? address : `${address}:${port}`;
 }
 
 function linkFor(server, address) {
   if (!address) return null;
-  const base = `http://${address}:${server.port}/`;
+  const base = `http://${hostFor(address, server.port)}/`;
   return server.isSetUp() ? base : `${base}?setup=${server.setupCode()}`;
 }
 
-export { startHost, linkFor };
+export { startHost, linkFor, hostFor };

@@ -1,7 +1,7 @@
 {
   "name": "phone-remote",
   "productName": "Phone Remote",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Control this laptop from your phone over Wi-Fi.",
   "type": "module",
