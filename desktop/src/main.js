@@ -17,7 +17,6 @@ const ICON = path.join(ROOT, 'assets', 'icon.png');
 const QR_OPTIONS = { margin: 1, width: 440, errorCorrectionLevel: 'M', color: { dark: '#0D0E11', light: '#FFFFFF' } };
 const PROFILE_CHECK_MS = 15000;
 const FORCE_QUIT_MS = 3000;
-const WIFI_SETTINGS_URL = 'ms-settings:network-wifi';
 
 if (app.isPackaged) process.env.NODE_ENV ??= 'production';
 
@@ -108,7 +107,6 @@ function registerIpc() {
   ipcMain.handle('get-state', () => state);
   ipcMain.handle('copy-link', () => copyLink());
   ipcMain.handle('reset-pin', () => confirmResetPin());
-  ipcMain.handle('open-wifi-settings', () => shell.openExternal(WIFI_SETTINGS_URL));
   ipcMain.handle('open-update', () => openUpdate());
 }
 

@@ -2,7 +2,7 @@ import type { ConnectionError } from "@/types";
 
 const CONNECTION_ERROR_TEXT: Record<ConnectionError, string> = {
   "wrong-pin": "Wrong PIN",
-  locked: "Too many wrong PINs. Wait a minute",
+  locked: "Too many wrong PINs. Wait a few minutes",
   replaced: "Another device took over",
   unreachable: "Can't reach laptop",
   "not-set-up": "Laptop needs a new PIN. Scan its setup QR",

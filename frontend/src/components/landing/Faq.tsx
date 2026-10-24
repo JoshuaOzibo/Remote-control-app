@@ -2,7 +2,7 @@ const QUESTIONS: { question: string; answer: string }[] = [
   {
     question: "My phone can't connect",
     answer:
-      "Put the phone and the laptop on the same Wi-Fi (not a guest network or mobile data), set the laptop's Wi-Fi to Private, and check that Phone Remote is running in the tray. Some hotel and office networks block devices from each other: turn on the laptop's Mobile hotspot and join that instead.",
+      "Put the phone and the laptop on the same Wi-Fi (not a guest network or mobile data) and check that Phone Remote is running in the tray. Some hotel and office networks block devices from each other: turn on the laptop's Mobile hotspot and join that instead.",
   },
   {
     question: "I forgot my PIN",

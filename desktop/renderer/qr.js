@@ -38,7 +38,7 @@ function render(state) {
   $("url").textContent = state.url ?? "";
 
   $("copy").disabled = !online;
-  $("warning").hidden = !state.publicNetwork;
+  $("public-note").hidden = !state.publicNetwork;
   $("reset").hidden = state.mode !== "ready";
   $("phone").textContent = state.controller ? `Phone connected · ${state.controller}` : "No phone connected";
   $("version").textContent = `v${state.version} · port ${state.port}`;
@@ -55,7 +55,6 @@ $("copy").addEventListener("click", async () => {
   }, COPIED_FOR_MS);
 });
 $("reset").addEventListener("click", () => window.phoneRemote.resetPin());
-$("wifi-settings").addEventListener("click", () => window.phoneRemote.openWifiSettings());
 $("update").addEventListener("click", () => window.phoneRemote.openUpdate());
 
 window.phoneRemote.onState(render);

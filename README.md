@@ -74,7 +74,7 @@ My laptop is plugged into a big monitor across the room. Skipping a YouTube ad, 
 
 Next time, just open the remote on your phone. It connects by itself while Phone Remote is running in the laptop's tray (right-click the tray icon to turn on **Start with Windows**).
 
-> **Is your Wi-Fi set to "Public"?** Windows blocks other devices on Public networks, and the app shows a warning when that's the case. Go to **Settings → Network & internet → Wi-Fi → your network** and set **Network profile type** to **Private**.
+> **Works on any Wi-Fi.** It doesn't matter whether Windows calls your network "Public" or "Private": the installer allows phones on the same local network either way (from version 0.1.1).
 
 ## How it works
 
@@ -90,9 +90,9 @@ The laptop app runs a small web server on your network. Your phone opens the rem
 - **Nothing leaves your network.** No cloud, no account, no tracking. The phone talks straight to the laptop.
 - **You choose the PIN**, and the laptop stores only a scrambled hash of it, never the PIN itself.
 - **Only someone at the laptop can set or reset the PIN.** It needs the one-time code shown on the laptop's screen.
-- **Guessing is stopped.** After 5 wrong PINs, that device is locked out for a minute.
+- **Guessing is stopped.** After 5 wrong PINs, that device is locked out for a minute. After 20 wrong PINs from any devices within 10 minutes, all logins pause for 5 minutes.
 - **One phone is in control at a time.** Other websites in your browser can't connect to it.
-- The firewall rule only allows **Private** networks (plus the laptop's own hotspot).
+- **Local network only.** The firewall rule allows devices on the same local network (Windows' *LocalSubnet*), never the internet. On café or hotel Wi-Fi, others there could see the PIN screen, so keep your PIN to yourself.
 
 ## FAQ
 
@@ -100,7 +100,6 @@ The laptop app runs a small web server on your network. Your phone opens the rem
 <summary><b>My phone can't connect</b></summary>
 
 - Make sure the phone and the laptop are on the **same Wi-Fi** (not a guest network, and not mobile data).
-- Set the laptop's Wi-Fi to **Private** (see above).
 - Check that Phone Remote is running (the icon in the taskbar tray).
 - Some hotel and office networks block devices from talking to each other. Turn on the laptop's **Mobile hotspot** and connect the phone to it instead.
 </details>

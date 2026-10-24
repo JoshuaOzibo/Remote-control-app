@@ -5,8 +5,7 @@
 
 !macro customInstall
   !insertmacro removePhoneRemoteFirewallRules
-  nsExec::ExecToLog 'netsh advfirewall firewall add rule name="Phone Remote" dir=in action=allow enable=yes program="$INSTDIR\Phone Remote.exe" protocol=TCP localport=80,3001-3010 profile=private'
-  nsExec::ExecToLog 'netsh advfirewall firewall add rule name="Phone Remote (laptop hotspot)" dir=in action=allow enable=yes program="$INSTDIR\Phone Remote.exe" protocol=TCP localport=80,3001-3010 remoteip=192.168.137.0/24 profile=any'
+  nsExec::ExecToLog 'netsh advfirewall firewall add rule name="Phone Remote" dir=in action=allow enable=yes program="$INSTDIR\Phone Remote.exe" protocol=TCP localport=80,3001-3010 remoteip=localsubnet profile=any'
 !macroend
 
 !macro customUnInstall

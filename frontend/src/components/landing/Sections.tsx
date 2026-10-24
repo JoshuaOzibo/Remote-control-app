@@ -175,9 +175,9 @@ export function DownloadSection() {
             <span className="text-text">Run anyway</span>.
           </div>
           <div className="rounded-2xl border border-line bg-well p-4">
-            <span className="font-semibold text-text">Same Wi-Fi, set to Private.</span> Your phone must be on the same
-            Wi-Fi as the laptop, and Windows must treat that network as <span className="text-text">Private</span>. The
-            app tells you if it isn&apos;t.
+            <span className="font-semibold text-text">Same Wi-Fi, that&apos;s all.</span> Your phone just needs to be on
+            the same Wi-Fi as the laptop, or on the laptop&apos;s hotspot. Public or Private networks both work; nothing
+            to set up in Windows.
           </div>
         </div>
       </div>
