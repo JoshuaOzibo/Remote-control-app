@@ -28,6 +28,9 @@ export function Hero() {
           </Link>
         </div>
         <LatestVersion className="font-mono text-[12px] text-dim" />
+        <Link href="/connect/" data-testid="scan-link" className="w-fit text-[14px] font-semibold text-amber no-underline">
+          Already installed? Scan your laptop&apos;s QR code →
+        </Link>
       </div>
 
       <div className="relative mx-auto flex h-[500px] w-full max-w-[460px] items-center justify-center sm:h-[560px]">

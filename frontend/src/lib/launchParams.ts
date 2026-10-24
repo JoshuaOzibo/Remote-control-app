@@ -1,4 +1,4 @@
-const SETUP_CODE_FORMAT = /^[A-Za-z0-9-]{8,9}$/;
+export const SETUP_CODE_FORMAT = /^[A-Za-z0-9-]{8,9}$/;
 const PIN_FORMAT = /^\d{4}$/;
 const LAUNCH_KEYS = ["setup", "pin"];
 

@@ -9,10 +9,16 @@ import { isCompletePin, PinInput } from "@/components/ui/PinInput";
 import { connect, useRemote } from "@/hooks/useRemote";
 import { connectionErrorText } from "@/lib/connectionErrors";
 import { isPageLaptop, laptopPageUrl, pageLaptopAddress } from "@/lib/network";
+import { parseLaptopLink } from "@/lib/qrLink";
+import { IS_SITE } from "@/lib/site";
 import { useRemoteStore } from "@/store/remoteStore";
 import type { RecentLaptop } from "@/types";
 import { ForgotPin } from "./ForgotPin";
+import { QrScanButton } from "./QrScanner";
 import { RecentLaptops } from "./RecentLaptops";
+
+const NOT_A_PHONE_REMOTE_CODE =
+  "That QR code isn't from Phone Remote. Scan the code in the Phone Remote window on your laptop.";
 
 export function ConnectForm() {
   const router = useRouter();
@@ -25,10 +31,11 @@ export function ConnectForm() {
   const [pin, setPin] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
+  const [scanNote, setScanNote] = useState<{ text: string; ok: boolean } | null>(null);
 
   if (hydrated && !prefilled) {
     setPrefilled(true);
-    setAddress(savedAddress || pageLaptopAddress());
+    setAddress(savedAddress || (IS_SITE ? "" : pageLaptopAddress()));
     setPin(savedPin);
   }
 
@@ -36,8 +43,32 @@ export function ConnectForm() {
 
   const start = (addr: string, code: string) => {
     if (!addr.trim() || !isCompletePin(code)) return;
+    if (IS_SITE) {
+      window.location.href = laptopPageUrl(addr, code);
+      return;
+    }
     setSubmitted(true);
     connect(addr.trim(), code, goHome);
+  };
+
+  const onScan = (text: string) => {
+    const link = parseLaptopLink(text);
+    if (!link) {
+      setScanNote({ text: NOT_A_PHONE_REMOTE_CODE, ok: false });
+      return;
+    }
+    if (IS_SITE || !isPageLaptop(link.address)) {
+      setScanNote({ text: `Opening ${link.address}…`, ok: true });
+      window.location.href = link.url;
+      return;
+    }
+    if (link.setupCode) {
+      useRemoteStore.getState().setSetupCode(link.setupCode);
+      router.push("/setup/");
+      return;
+    }
+    setAddress(link.address);
+    setScanNote({ text: "Laptop found. Enter your PIN.", ok: true });
   };
 
   const onSubmit = (e: SubmitEvent) => {
@@ -74,10 +105,29 @@ export function ConnectForm() {
         <div className="flex flex-col gap-1">
           <div className="text-[15px] font-semibold">Open Phone Remote on your laptop</div>
           <div className="text-[13px] leading-[1.45] text-muted">
-            Scan its QR code with your phone&apos;s camera, or enter the PIN you chose for this laptop. Use the same
-            Wi-Fi as the laptop, or the laptop&apos;s hotspot.
+            Scan the QR code in its window, or enter the PIN you chose for this laptop. Use the same Wi-Fi as the
+            laptop, or the laptop&apos;s hotspot.
           </div>
         </div>
+      </div>
+
+      <div className="flex flex-col gap-2.5">
+        <QrScanButton onResult={onScan} onError={(text) => setScanNote({ text, ok: false })} />
+        {scanNote && (
+          <p
+            role={scanNote.ok ? "status" : "alert"}
+            data-testid="scan-note"
+            className={`m-0 text-center text-[13px] font-semibold ${scanNote.ok ? "text-ok" : "text-power"}`}
+          >
+            {scanNote.text}
+          </p>
+        )}
+      </div>
+
+      <div className="flex items-center gap-3 text-[12px] text-dim" aria-hidden>
+        <span className="h-px flex-1 bg-line" />
+        or enter your PIN
+        <span className="h-px flex-1 bg-line" />
       </div>
 
       <form onSubmit={onSubmit} className="contents">

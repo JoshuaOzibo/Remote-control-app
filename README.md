@@ -25,7 +25,9 @@
 <p align="center">
   <a href="https://github.com/JoshuaOzibo/Remote-control-app/releases/latest/download/PhoneRemote-Setup.exe"><b>Download the latest version</b></a>
   ·
-  <a href="https://github.com/JoshuaOzibo/Remote-control-app/releases">All releases</a>
+  <a href="https://remote-control-app-chi.vercel.app/demo/"><b>Try the live demo</b></a>
+  ·
+  <a href="https://remote-control-app-chi.vercel.app">Website</a>
   ·
   <a href="#getting-started">Getting started</a>
 </p>
@@ -67,6 +69,7 @@ My laptop is plugged into a big monitor across the room. Skipping a YouTube ad, 
    - The installer asks for admin rights once, so it can add a firewall rule for your private network.
 2. **Phone Remote opens** and shows a QR code. Your phone must be on **the same Wi-Fi** as the laptop.
 3. **Scan the QR code** with your phone's camera and **choose a 4-digit PIN**. That's it: the remote is connected.
+   - No QR reader in your camera app? Open [remote-control-app-chi.vercel.app/connect](https://remote-control-app-chi.vercel.app/connect/) on your phone and tap **Scan the QR code on your laptop**.
 4. *(Optional)* On your phone, use **Add to Home Screen** so the remote opens like an app.
 
 Next time, just open the remote on your phone. It connects by itself while Phone Remote is running in the laptop's tray (right-click the tray icon to turn on **Start with Windows**).
