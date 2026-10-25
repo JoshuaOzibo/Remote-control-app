@@ -1,9 +1,11 @@
 import {
   Activity,
   AppWindow,
+  ArrowDownToLine,
   ArrowLeft,
   ArrowRight,
   ArrowRightLeft,
+  ArrowUpToLine,
   Bell,
   Cast,
   ChevronsLeft,
@@ -17,6 +19,7 @@ import {
   Grid2x2,
   History,
   House,
+  LayoutGrid,
   Link,
   Lock,
   Maximize,
@@ -31,6 +34,7 @@ import {
   Scissors,
   Search,
   SearchX,
+  Settings,
   Settings2,
   SkipBack,
   SkipForward,
@@ -47,96 +51,103 @@ import {
 } from "lucide-react";
 import type { KeyName } from "@/lib/protocol";
 
-export type Action = { k: KeyName; label: string; Icon: LucideIcon };
+export type Action = { k: KeyName; label: string; Icon: LucideIcon; hint: string; confirm?: boolean };
 
 export type ActionSection = { title: string; actions: Action[] };
 
 const LAPTOP: ActionSection[] = [
   {
-    title: "Windows",
+    title: "Apps",
     actions: [
-      { k: "start", label: "Start", Icon: Grid2x2 },
-      { k: "search", label: "Search", Icon: Search },
-      { k: "explorer", label: "Files", Icon: FolderOpen },
-      { k: "taskmanager", label: "Task manager", Icon: Activity },
-      { k: "desktop", label: "Desktop", Icon: House },
-      { k: "lock", label: "Lock", Icon: Lock },
+      { k: "start", label: "Start menu", Icon: Grid2x2, hint: "Win" },
+      { k: "search", label: "Search", Icon: Search, hint: "Win + S" },
+      { k: "explorer", label: "Files", Icon: FolderOpen, hint: "Win + E" },
+      { k: "switch", label: "Switch app", Icon: ArrowRightLeft, hint: "Alt + Tab" },
+      { k: "taskview", label: "All windows", Icon: LayoutGrid, hint: "Win + Tab" },
+      { k: "desktop", label: "Show desktop", Icon: House, hint: "Win + D" },
     ],
   },
   {
     title: "Window",
     actions: [
-      { k: "minimize", label: "Minimize", Icon: Minimize2 },
-      { k: "maximize", label: "Maximize", Icon: Maximize2 },
-      { k: "switch", label: "Switch", Icon: ArrowRightLeft },
-      { k: "snapleft", label: "Snap left", Icon: PanelLeft },
-      { k: "snapright", label: "Snap right", Icon: PanelRight },
-      { k: "closewindow", label: "Close", Icon: X },
+      { k: "minimize", label: "Make smaller", Icon: Minimize2, hint: "Win + Down" },
+      { k: "maximize", label: "Make bigger", Icon: Maximize2, hint: "Win + Up" },
+      { k: "closewindow", label: "Close app", Icon: X, hint: "Alt + F4", confirm: true },
+      { k: "snapleft", label: "Left half", Icon: PanelLeft, hint: "Win + Left" },
+      { k: "snapright", label: "Right half", Icon: PanelRight, hint: "Win + Right" },
+      { k: "fullscreen", label: "Full screen", Icon: Maximize, hint: "F" },
     ],
   },
   {
-    title: "Screen and panels",
+    title: "Laptop",
     actions: [
-      { k: "project", label: "Display", Icon: Cast },
-      { k: "quicksettings", label: "Quick settings", Icon: Settings2 },
-      { k: "notifications", label: "Alerts", Icon: Bell },
-      { k: "clipboard", label: "Clipboard", Icon: ClipboardList },
-      { k: "emoji", label: "Emoji", Icon: Smile },
-      { k: "fullscreen", label: "Full screen", Icon: Maximize },
+      { k: "lock", label: "Lock", Icon: Lock, hint: "Win + L", confirm: true },
+      { k: "settings", label: "Settings", Icon: Settings, hint: "Win + I" },
+      { k: "quicksettings", label: "Quick settings", Icon: Settings2, hint: "Win + A" },
+      { k: "notifications", label: "Notifications", Icon: Bell, hint: "Win + N" },
+      { k: "project", label: "Second screen", Icon: Cast, hint: "Win + P" },
+      { k: "snip", label: "Screenshot", Icon: Crop, hint: "Win + Shift + S" },
     ],
   },
   {
-    title: "Media",
+    title: "Watching",
     actions: [
-      { k: "prev", label: "Previous", Icon: SkipBack },
-      { k: "playpause", label: "Play / pause", Icon: CirclePlay },
-      { k: "next", label: "Next", Icon: SkipForward },
+      { k: "prev", label: "Previous", Icon: SkipBack, hint: "Media key" },
+      { k: "playpause", label: "Play / pause", Icon: CirclePlay, hint: "Media key" },
+      { k: "next", label: "Next", Icon: SkipForward, hint: "Media key" },
     ],
+  },
+  {
+    title: "Fix problems",
+    actions: [{ k: "taskmanager", label: "Task Manager", Icon: Activity, hint: "Ctrl + Shift + Esc", confirm: true }],
   },
 ];
 
 const SHORTCUTS: ActionSection[] = [
   {
-    title: "Tabs",
+    title: "Web browser",
     actions: [
-      { k: "newtab", label: "New tab", Icon: SquarePlus },
-      { k: "closetab", label: "Close tab", Icon: SquareX },
-      { k: "reopentab", label: "Reopen tab", Icon: History },
-      { k: "prevtab", label: "Prev tab", Icon: ChevronsLeft },
-      { k: "nexttab", label: "Next tab", Icon: ChevronsRight },
-      { k: "newwindow", label: "New window", Icon: AppWindow },
+      { k: "back", label: "Back", Icon: ArrowLeft, hint: "Alt + Left" },
+      { k: "forward", label: "Forward", Icon: ArrowRight, hint: "Alt + Right" },
+      { k: "refresh", label: "Refresh", Icon: RefreshCw, hint: "F5" },
+      { k: "addressbar", label: "Web address", Icon: Link, hint: "Ctrl + L" },
+      { k: "find", label: "Find on page", Icon: TextSearch, hint: "Ctrl + F" },
+      { k: "menu", label: "Right-click menu", Icon: MousePointerClick, hint: "Shift + F10" },
+      { k: "pageup", label: "Page up", Icon: ArrowUpToLine, hint: "Page Up" },
+      { k: "pagedown", label: "Page down", Icon: ArrowDownToLine, hint: "Page Down" },
     ],
   },
   {
-    title: "Browse",
+    title: "Tabs",
     actions: [
-      { k: "back", label: "Back", Icon: ArrowLeft },
-      { k: "forward", label: "Forward", Icon: ArrowRight },
-      { k: "refresh", label: "Refresh", Icon: RefreshCw },
-      { k: "addressbar", label: "Address bar", Icon: Link },
-      { k: "find", label: "Find", Icon: TextSearch },
-      { k: "menu", label: "Menu", Icon: MousePointerClick },
+      { k: "newtab", label: "New tab", Icon: SquarePlus, hint: "Ctrl + T" },
+      { k: "closetab", label: "Close tab", Icon: SquareX, hint: "Ctrl + W", confirm: true },
+      { k: "reopentab", label: "Reopen tab", Icon: History, hint: "Ctrl + Shift + T" },
+      { k: "prevtab", label: "Previous tab", Icon: ChevronsLeft, hint: "Ctrl + Shift + Tab" },
+      { k: "nexttab", label: "Next tab", Icon: ChevronsRight, hint: "Ctrl + Tab" },
+      { k: "newwindow", label: "New window", Icon: AppWindow, hint: "Ctrl + N" },
     ],
   },
   {
     title: "Zoom",
     actions: [
-      { k: "zoomout", label: "Zoom out", Icon: ZoomOut },
-      { k: "zoomreset", label: "Reset", Icon: SearchX },
-      { k: "zoomin", label: "Zoom in", Icon: ZoomIn },
+      { k: "zoomout", label: "Zoom out", Icon: ZoomOut, hint: "Ctrl + -" },
+      { k: "zoomreset", label: "Normal size", Icon: SearchX, hint: "Ctrl + 0" },
+      { k: "zoomin", label: "Zoom in", Icon: ZoomIn, hint: "Ctrl + =" },
     ],
   },
   {
-    title: "Edit",
+    title: "Editing",
     actions: [
-      { k: "copy", label: "Copy", Icon: Copy },
-      { k: "cut", label: "Cut", Icon: Scissors },
-      { k: "paste", label: "Paste", Icon: ClipboardPaste },
-      { k: "undo", label: "Undo", Icon: Undo2 },
-      { k: "redo", label: "Redo", Icon: Redo2 },
-      { k: "selectall", label: "Select all", Icon: TextSelect },
-      { k: "save", label: "Save", Icon: Save },
-      { k: "snip", label: "Snip", Icon: Crop },
+      { k: "copy", label: "Copy", Icon: Copy, hint: "Ctrl + C" },
+      { k: "cut", label: "Cut", Icon: Scissors, hint: "Ctrl + X" },
+      { k: "paste", label: "Paste", Icon: ClipboardPaste, hint: "Ctrl + V" },
+      { k: "undo", label: "Undo", Icon: Undo2, hint: "Ctrl + Z" },
+      { k: "redo", label: "Redo", Icon: Redo2, hint: "Ctrl + Y" },
+      { k: "selectall", label: "Select all", Icon: TextSelect, hint: "Ctrl + A" },
+      { k: "save", label: "Save", Icon: Save, hint: "Ctrl + S" },
+      { k: "clipboard", label: "Copied items", Icon: ClipboardList, hint: "Win + V" },
+      { k: "emoji", label: "Emoji", Icon: Smile, hint: "Win + ." },
     ],
   },
 ];
@@ -144,3 +155,7 @@ const SHORTCUTS: ActionSection[] = [
 export const ACTION_GROUPS = { laptop: LAPTOP, shortcuts: SHORTCUTS } as const;
 
 export type ActionGroup = keyof typeof ACTION_GROUPS;
+
+export const GROUP_TITLES: Record<ActionGroup, string> = { laptop: "Laptop & apps", shortcuts: "Web & editing" };
+
+export const GROUP_ORDER: ActionGroup[] = ["laptop", "shortcuts"];

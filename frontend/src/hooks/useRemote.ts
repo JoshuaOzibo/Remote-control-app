@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { isCompletePin } from "@/components/ui/PinInput";
+import { vibrate } from "@/lib/haptics";
 import { fetchLaptopName } from "@/lib/laptopInfo";
 import { takeLaunchParams } from "@/lib/launchParams";
 import { normalizeAddress, pageLaptopAddress } from "@/lib/network";
@@ -174,6 +175,7 @@ export function send(msg: ClientMsg) {
   if (transport) return transport.send(msg);
   if (!socket || !authed || socket.readyState !== WebSocket.OPEN) {
     if (process.env.NODE_ENV === "development") console.debug("[remote] not sent (offline)", msg);
+    if (useRemoteStore.getState().nudgeOffline()) vibrate([20, 40, 20]);
     return false;
   }
   socket.send(JSON.stringify(msg));

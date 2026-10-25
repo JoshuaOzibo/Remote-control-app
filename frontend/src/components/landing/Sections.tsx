@@ -77,11 +77,11 @@ export function HowItWorks() {
 }
 
 const FEATURES: { Icon: LucideIcon; title: string; text: string }[] = [
-  { Icon: MousePointer2, title: "Trackpad", text: "Drag to move, tap to click, two-finger tap to right-click, two fingers to scroll." },
+  { Icon: MousePointer2, title: "Mouse pad", text: "Slide to move, tap or press Left and Right click, and roll the strip to scroll." },
   { Icon: CircleDot, title: "Navigation dial", text: "Arrows and OK on a 3D dial with hold-to-repeat. Made for menus and players." },
   { Icon: Volume2, title: "Media and volume", text: "Volume, mute, play and pause, next track, full screen and voice typing." },
   { Icon: Keyboard, title: "Type from your phone", text: "Send text to the laptop, emoji and accents included." },
-  { Icon: Zap, title: "Shortcuts", text: "Snip, tabs, switch windows, snap, lock, task manager, copy and paste, and more." },
+  { Icon: Zap, title: "Shortcuts", text: "Screenshot, tabs, switch apps, lock, copy and paste, and more, in plain words." },
   { Icon: MonitorSmartphone, title: "Feels like an app", text: "Add it to your home screen. The laptop side sits quietly in the tray." },
 ];
 

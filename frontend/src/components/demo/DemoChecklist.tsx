@@ -5,10 +5,10 @@ import { useDemoStore, type DemoGoal } from "@/store/demoStore";
 import { cn } from "@/lib/utils";
 
 const GOALS: { goal: DemoGoal; label: string; hint: string }[] = [
-  { goal: "moved", label: "Move the cursor", hint: "Trackpad tab, then drag on the pad" },
-  { goal: "skippedAd", label: "Skip the ad", hint: "Put the cursor on “Skip ad”, then tap the pad" },
-  { goal: "volume", label: "Change the volume", hint: "VOL + or −, or mute" },
-  { goal: "typed", label: "Type a note", hint: "Keypad tab, then the keyboard key" },
+  { goal: "moved", label: "Move the cursor", hint: "Mouse tab, then slide a finger on the pad" },
+  { goal: "skippedAd", label: "Skip the ad", hint: "Put the cursor on “Skip ad”, then press Left click" },
+  { goal: "volume", label: "Change the volume", hint: "Louder, Quieter or Mute" },
+  { goal: "typed", label: "Type a note", hint: "Type tab, then Type on laptop" },
 ];
 
 export function DemoChecklist() {

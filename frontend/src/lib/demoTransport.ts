@@ -9,66 +9,19 @@ const MOVE_GAIN = 1.5;
 const MOVE_X = (100 / SCREEN_WIDTH_PX) * MOVE_GAIN;
 const MOVE_Y = MOVE_X / SCREEN_ASPECT;
 
+const ACTIONS = Object.values(ACTION_GROUPS)
+  .flat()
+  .flatMap(({ actions }) => actions);
+
 const SHORTCUTS: Partial<Record<KeyName, string>> = {
-  start: "Win",
-  search: "Win + S",
-  explorer: "Win + E",
-  taskmanager: "Ctrl + Shift + Esc",
-  desktop: "Win + D",
-  lock: "Win + L",
-  minimize: "Win + Down",
-  maximize: "Win + Up",
-  switch: "Alt + Tab",
-  snapleft: "Win + Left",
-  snapright: "Win + Right",
-  closewindow: "Alt + F4",
-  project: "Win + P",
-  quicksettings: "Win + A",
-  notifications: "Win + N",
-  clipboard: "Win + V",
-  emoji: "Win + .",
-  newtab: "Ctrl + T",
-  closetab: "Ctrl + W",
-  reopentab: "Ctrl + Shift + T",
-  prevtab: "Ctrl + Shift + Tab",
-  nexttab: "Ctrl + Tab",
-  newwindow: "Ctrl + N",
-  back: "Alt + Left",
-  forward: "Alt + Right",
-  refresh: "F5",
-  addressbar: "Ctrl + L",
-  find: "Ctrl + F",
-  menu: "Shift + F10",
-  zoomout: "Ctrl + -",
-  zoomreset: "Ctrl + 0",
-  zoomin: "Ctrl + =",
-  copy: "Ctrl + C",
-  cut: "Ctrl + X",
-  paste: "Ctrl + V",
-  undo: "Ctrl + Z",
-  redo: "Ctrl + Y",
-  selectall: "Ctrl + A",
-  save: "Ctrl + S",
-  snip: "Win + Shift + S",
-  taskview: "Win + Tab",
-  settings: "Win + I",
+  ...Object.fromEntries(ACTIONS.map(({ k, hint }) => [k, hint])),
   voice: "Win + H",
 };
 
-const EXTRA_LABELS: Partial<Record<KeyName, string>> = {
-  taskview: "Task view",
-  settings: "Settings",
+const LABELS: Partial<Record<KeyName, string>> = {
+  ...Object.fromEntries(ACTIONS.map(({ k, label }) => [k, label])),
   voice: "Voice typing",
   esc: "Escape",
-};
-
-const LABELS: Partial<Record<KeyName, string>> = {
-  ...Object.fromEntries(
-    Object.values(ACTION_GROUPS)
-      .flat()
-      .flatMap(({ actions }) => actions.map(({ k, label }) => [k, label])),
-  ),
-  ...EXTRA_LABELS,
 };
 
 function showShortcut(k: KeyName) {
@@ -78,8 +31,8 @@ function showShortcut(k: KeyName) {
 const KEY_ACTIONS: Partial<Record<KeyName, () => void>> = {
   up: () => useDemoStore.getState().moveFocus(-1),
   down: () => useDemoStore.getState().moveFocus(1),
-  left: () => useDemoStore.getState().showToast("Back 10 seconds", "Left arrow", "media"),
-  right: () => useDemoStore.getState().showToast("Forward 10 seconds", "Right arrow", "media"),
+  left: () => useDemoStore.getState().showToast("Rewind 5 seconds", "Left arrow", "media"),
+  right: () => useDemoStore.getState().showToast("Skip ahead 5 seconds", "Right arrow", "media"),
   enter: () => {
     const store = useDemoStore.getState();
     store.playVideo(store.focusIndex);

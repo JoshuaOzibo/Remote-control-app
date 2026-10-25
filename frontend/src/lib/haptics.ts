@@ -1,5 +1,5 @@
 /** Short haptic tick. No-op where vibration isn't supported (e.g. iOS Safari). */
-export function vibrate(ms = 10) {
+export function vibrate(ms: number | number[] = 10) {
   try {
     navigator.vibrate?.(ms);
   } catch {

@@ -126,57 +126,19 @@
   }
 
   .cap {
-    font-family: var(--font-jetbrains), monospace;
+    font-family: var(--font-sora), sans-serif;
     font-weight: 500;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #a3a9b4;
+    font-size: 12px;
+    color: #b4b9c2;
   }
 
   .label {
-    font-family: var(--font-jetbrains), monospace;
-    font-weight: 500;
-    font-size: 11px;
-    letter-spacing: 0.14em;
+    font-family: var(--font-sora), sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #8c93a0;
-  }
-
-  .rocker {
-    width: 84px;
-    height: 196px;
-    border-radius: 42px;
-    background: linear-gradient(180deg, #262a31, #191c21);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.07),
-      0 6px 0 #0a0b0e,
-      0 14px 24px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 0;
-    box-sizing: border-box;
-  }
-  .rk {
-    appearance: none;
-    width: 72px;
-    height: 72px;
-    border-radius: 36px;
-    border: 0;
-    background: transparent;
-    color: #ecedef;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition:
-      background 60ms ease-out,
-      transform 60ms ease-out;
-  }
-  .rk[data-pressed] {
-    background: rgba(0, 0, 0, 0.25);
-    transform: scale(0.94);
+    color: #a3a9b4;
   }
 
   /* Not `.ring`: that name is a Tailwind utility and would add its own box-shadow. */
@@ -194,19 +156,29 @@
       0 0 0 6px #121419,
       0 0 0 7px #262930;
   }
-  /* Indicators only: the arrow the knob is turned to lights amber. */
   .arrow {
+    appearance: none;
     position: absolute;
     width: 72px;
     height: 72px;
+    border: 0;
+    padding: 0;
+    border-radius: 50%;
+    background: transparent;
     color: #c9cdd4;
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: none;
+    touch-action: none;
     transition:
       color 120ms ease-out,
-      filter 120ms ease-out;
+      filter 120ms ease-out,
+      background 60ms ease-out,
+      transform 60ms ease-out;
+  }
+  .arrow[data-pressed] {
+    background: rgba(0, 0, 0, 0.3);
+    transform: scale(0.92);
   }
   .arrow[data-lit] {
     color: #ff9f43;
@@ -263,6 +235,20 @@
       inset 0 1px 2px rgba(0, 0, 0, 0.9),
       0 1px 0 rgba(255, 255, 255, 0.1);
   }
+  .knob-ok {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-sora), sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #d5d8de;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+  }
   .knob-gloss {
     position: absolute;
     inset: 0;
@@ -292,21 +278,14 @@
     .knob,
     .knob-face,
     .arrow,
-    .dial-pointer {
+    .dial-pointer,
+    .strip {
       transition: none;
     }
+    .offline-banner[data-nudged] {
+      animation: none;
+    }
   }
-  .wheel {
-    width: 40px;
-    height: 92px;
-    border-radius: 20px;
-    background: repeating-linear-gradient(180deg, #40454f 0 3px, #1c1f24 3px 6px);
-    box-shadow:
-      inset 0 8px 10px rgba(0, 0, 0, 0.75),
-      inset 0 -8px 10px rgba(0, 0, 0, 0.75),
-      0 0 0 2px #101215;
-  }
-
   .field {
     box-sizing: border-box;
     width: 100%;
@@ -363,10 +342,43 @@
     top: 10px;
     bottom: 10px;
     width: 34px;
+    overflow: hidden;
     border-radius: 17px;
-    background: repeating-linear-gradient(180deg, #2a2e36 0 2px, #16181d 2px 8px);
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+    background-color: #16181d;
+    background-image: repeating-linear-gradient(180deg, #343943 0 2px, #16181d 2px 8px);
+    background-position: 0 var(--roll, 0px);
+    box-shadow:
+      inset 0 2px 6px rgba(0, 0, 0, 0.6),
+      0 0 0 1px #1d2026;
     touch-action: none;
+    transition: box-shadow 120ms ease-out;
+  }
+  .strip::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.78) 0%,
+        rgba(0, 0, 0, 0.3) 16%,
+        rgba(255, 255, 255, 0.07) 50%,
+        rgba(0, 0, 0, 0.3) 84%,
+        rgba(0, 0, 0, 0.78) 100%
+      ),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 32%, rgba(0, 0, 0, 0) 68%, rgba(0, 0, 0, 0.5) 100%);
+  }
+  .strip[data-active] {
+    background-image: repeating-linear-gradient(180deg, #5a4630 0 2px, #16181d 2px 8px);
+    box-shadow:
+      inset 0 3px 10px rgba(0, 0, 0, 0.8),
+      0 0 0 1px rgba(255, 159, 67, 0.4);
+  }
+
+  .offline-banner[data-nudged] {
+    animation: nudge 0.42s ease-in-out;
   }
 }
 
@@ -470,6 +482,16 @@
   }
 }
 
+@keyframes nudge {
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
 @keyframes demo-drift {
   to {
     transform: translate(18%, -12%) scale(1.15);

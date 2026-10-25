@@ -1,15 +1,15 @@
 "use client";
 
-import { CircleDot, Grid3x3, PanelBottom } from "lucide-react";
+import { CircleDot, Keyboard, MousePointer2 } from "lucide-react";
 import { vibrate } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 import { useRemoteStore } from "@/store/remoteStore";
 import type { Mode } from "@/types";
 
 const OPTIONS: { mode: Mode; label: string; Icon: typeof CircleDot }[] = [
-  { mode: "dial", label: "Dial", Icon: CircleDot },
-  { mode: "trackpad", label: "Trackpad", Icon: PanelBottom },
-  { mode: "keypad", label: "Keypad", Icon: Grid3x3 },
+  { mode: "dial", label: "Arrows", Icon: CircleDot },
+  { mode: "trackpad", label: "Mouse", Icon: MousePointer2 },
+  { mode: "keypad", label: "Type", Icon: Keyboard },
 ];
 
 export function SegmentedToggle() {
@@ -35,7 +35,7 @@ export function SegmentedToggle() {
               setMode(value);
             }}
             className={cn(
-              "flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border-0 font-sans text-[13px] font-semibold transition-colors",
+              "flex h-12 flex-1 items-center justify-center gap-2 rounded-xl border-0 font-sans text-[14px] font-semibold transition-colors",
               active ? "bg-[#2A2E36] text-text shadow-[0_2px_0_#0A0B0E]" : "bg-transparent text-muted",
             )}
           >

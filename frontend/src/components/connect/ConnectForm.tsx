@@ -7,7 +7,7 @@ import { icon } from "@/components/ui/icons";
 import { Key } from "@/components/ui/Key";
 import { isCompletePin, PinInput } from "@/components/ui/PinInput";
 import { connect, useRemote } from "@/hooks/useRemote";
-import { connectionErrorText } from "@/lib/connectionErrors";
+import { connectionErrorHelp, connectionErrorText } from "@/lib/connectionErrors";
 import { isPageLaptop, laptopPageUrl, pageLaptopAddress } from "@/lib/network";
 import { parseLaptopLink } from "@/lib/qrLink";
 import { IS_SITE } from "@/lib/site";
@@ -87,7 +87,7 @@ export function ConnectForm() {
   };
 
   const loading = submitted && status === "connecting";
-  const message = submitted && status === "error" ? connectionErrorText(error) : null;
+  const failed = submitted && status === "error";
 
   return (
     <>
@@ -95,8 +95,10 @@ export function ConnectForm() {
         <Key aria-label="Back to remote" onPress={goHome} className="h-12 w-12 shrink-0 rounded-3xl">
           <ChevronLeft {...icon} />
         </Key>
-        <h1 className="m-0 text-[18px] font-bold">Enter PIN</h1>
+        <h1 className="m-0 text-[18px] font-bold">Connect to your laptop</h1>
       </header>
+
+      <RecentLaptops onPick={pick} />
 
       <div className="flex items-center gap-3.5 rounded-[20px] border border-line bg-card p-[18px]">
         <div className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-2xl bg-[#1F2228] text-amber">
@@ -105,8 +107,8 @@ export function ConnectForm() {
         <div className="flex flex-col gap-1">
           <div className="text-[15px] font-semibold">Open Phone Remote on your laptop</div>
           <div className="text-[13px] leading-[1.45] text-muted">
-            Scan the QR code in its window, or enter the PIN you chose for this laptop. Use the same Wi-Fi as the
-            laptop, or the laptop&apos;s hotspot.
+            Then scan the QR code it shows, or type your 4-digit PIN. Keep this phone on the same Wi-Fi as the
+            laptop.
           </div>
         </div>
       </div>
@@ -138,13 +140,17 @@ export function ConnectForm() {
           <PinInput value={pin} onChange={setPin} labelledBy="pinlabel" />
         </div>
 
-        <div className="flex flex-col gap-2.5">
-          <label className="label" htmlFor="addr">
+        <details open={IS_SITE} className="rounded-[20px] border border-line bg-card px-[18px] py-3.5">
+          <summary
+            className="cursor-pointer list-none text-[14px] font-semibold text-muted [&::-webkit-details-marker]:hidden"
+          >
+            Enter the laptop address yourself
+          </summary>
+          <label className="label mt-3 block" htmlFor="addr">
             Laptop address
           </label>
           <input
             id="addr"
-            className="field"
             type="text"
             inputMode="url"
             autoCapitalize="off"
@@ -153,8 +159,12 @@ export function ConnectForm() {
             placeholder="192.168.1.23:3001"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
+            className="field mt-2.5"
           />
-        </div>
+          <p className="m-0 mt-2.5 text-[12px] leading-[1.45] text-dim">
+            It is the link shown under the QR code on the laptop, for example 192.168.1.23.
+          </p>
+        </details>
 
         <div className="flex flex-col gap-3">
           <Key
@@ -165,17 +175,20 @@ export function ConnectForm() {
           >
             {loading ? "Connecting…" : "Connect"}
           </Key>
-          {message && (
-            <p role="alert" className="m-0 text-center text-[13px] font-semibold text-power">
-              {message}
-            </p>
+          {failed && (
+            <div role="alert" className="flex flex-col gap-2 rounded-[20px] border border-[#5A2A2A] bg-[#1E1515] p-4">
+              <p className="m-0 text-[14px] font-semibold text-power">{connectionErrorText(error)}</p>
+              <ul className="m-0 flex list-disc flex-col gap-1 pl-5 text-[13px] leading-[1.45] text-muted">
+                {connectionErrorHelp(error).map((tip) => (
+                  <li key={tip}>{tip}</li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
       </form>
 
       <ForgotPin />
-
-      <RecentLaptops onPick={pick} />
     </>
   );
 }

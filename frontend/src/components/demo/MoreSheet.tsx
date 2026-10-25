@@ -1,14 +1,9 @@
 "use client";
 
 import { ActionGrid } from "@/components/more/ActionGrid";
-import type { ActionGroup } from "@/components/more/moreActions";
+import { GROUP_ORDER, GROUP_TITLES, type ActionGroup } from "@/components/more/moreActions";
 import { Key } from "@/components/ui/Key";
 import { cn } from "@/lib/utils";
-
-const TABS: { group: ActionGroup; label: string }[] = [
-  { group: "shortcuts", label: "Shortcuts" },
-  { group: "laptop", label: "Laptop" },
-];
 
 export function MoreSheet({ group, onChange }: { group: ActionGroup | null; onChange: (group: ActionGroup | null) => void }) {
   if (!group) return null;
@@ -26,19 +21,19 @@ export function MoreSheet({ group, onChange }: { group: ActionGroup | null; onCh
       >
         <div className="mx-auto h-1 w-10 rounded-full bg-[#2A2E36]" aria-hidden />
         <div className="grid grid-cols-2 gap-2 rounded-2xl bg-well p-1" role="tablist">
-          {TABS.map((tab) => (
+          {GROUP_ORDER.map((item) => (
             <button
-              key={tab.group}
+              key={item}
               type="button"
               role="tab"
-              aria-selected={tab.group === group}
-              onClick={() => onChange(tab.group)}
+              aria-selected={item === group}
+              onClick={() => onChange(item)}
               className={cn(
-                "h-10 rounded-xl font-sans text-[14px] font-semibold text-muted",
-                tab.group === group && "bg-[#232730] text-text",
+                "h-11 rounded-xl font-sans text-[14px] font-semibold text-muted",
+                item === group && "bg-[#232730] text-text",
               )}
             >
-              {tab.label}
+              {GROUP_TITLES[item]}
             </button>
           ))}
         </div>

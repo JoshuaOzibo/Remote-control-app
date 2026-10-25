@@ -29,7 +29,7 @@ export function RecentLaptops({ onPick }: { onPick: (laptop: RecentLaptop) => vo
 
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="label">Recent</div>
+      <div className="label">Your laptops</div>
       {recent.map((laptop) => {
         const live = status === "connected" && laptop.address === current;
         return (

@@ -4,13 +4,13 @@ import { MoreHeader } from "@/components/more/MoreHeader";
 import { Screen } from "@/components/ui/Screen";
 
 export const metadata: Metadata = {
-  title: "Shortcuts · Remote",
+  title: "Web & editing · Remote",
 };
 
 export default function MoreShortcutsPage() {
   return (
     <Screen className="gap-6">
-      <MoreHeader title="Shortcuts" />
+      <MoreHeader group="shortcuts" />
       <ActionGrid group="shortcuts" />
     </Screen>
   );

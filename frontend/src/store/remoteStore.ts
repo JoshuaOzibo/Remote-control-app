@@ -4,6 +4,7 @@ import { load, save, STORAGE_KEYS } from "@/lib/storage";
 import { MODES, type ConnectionError, type ConnectionStatus, type Mode, type RecentLaptop } from "@/types";
 
 const MAX_RECENT = 5;
+const NUDGE_EVERY_MS = 1200;
 
 function savedMode(): Mode {
   const mode = load<string>(STORAGE_KEYS.mode, "dial");
@@ -35,6 +36,7 @@ type RemoteState = {
   autoConnect: boolean;
   setupCode: string | null;
   hydrated: boolean;
+  offlineNudgeAt: number;
 
   setStatus: (status: ConnectionStatus, error?: ConnectionError | null) => void;
   setMode: (mode: Mode) => void;
@@ -45,6 +47,7 @@ type RemoteState = {
   rename: (address: string, name: string) => void;
   forget: (address: string) => void;
   hydrate: () => void;
+  nudgeOffline: () => boolean;
 };
 
 export const useRemoteStore = create<RemoteState>((set, get) => ({
@@ -58,6 +61,7 @@ export const useRemoteStore = create<RemoteState>((set, get) => ({
   autoConnect: true,
   setupCode: null,
   hydrated: false,
+  offlineNudgeAt: 0,
 
   setStatus: (status, error = null) => set({ status, error }),
   setMode: (mode) => {
@@ -104,5 +108,12 @@ export const useRemoteStore = create<RemoteState>((set, get) => ({
       autoConnect: load<boolean>(STORAGE_KEYS.autoConnect, true) !== false,
       hydrated: true,
     });
+  },
+
+  nudgeOffline: () => {
+    const now = Date.now();
+    if (now - get().offlineNudgeAt < NUDGE_EVERY_MS) return false;
+    set({ offlineNudgeAt: now });
+    return true;
   },
 }));
